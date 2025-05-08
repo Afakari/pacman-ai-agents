@@ -12,15 +12,17 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-# imports from python standard library
-import grading
 import imp
 import optparse
 import os
+import random
 import re
 import sys
+
+# imports from python standard library
+import grading
 import projectParams
-import random
+
 random.seed(0)
 try: 
     from pacman import GameState
@@ -130,7 +132,6 @@ def loadModuleString(moduleSource):
     setModuleName(tmp, k)
     return tmp
 
-import py_compile
 
 def loadModuleFile(moduleName, filePath):
     with open(filePath, 'r') as f:
@@ -191,7 +192,7 @@ def printTest(testDict, solutionDict):
     for line in testDict["__raw_lines__"]:
         print("   |", line)
     print("Solution:")
-    for line in solutionDict["__raw_lines__"]:
+    for line in spythonolutionDict["__raw_lines__"]:
         print("   |", line)
 
 

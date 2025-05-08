@@ -34,12 +34,14 @@ description for details.
 Good luck and happy searching!
 """
 
-from game import Directions
-from game import Agent
-from game import Actions
-import util
 import time
+
 import search
+import util
+from game import Actions
+from game import Agent
+from game import Directions
+
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -314,16 +316,15 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startingPosition, []
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        node = state[0]
+        # TODO
     def expand(self, state):
         """
         Returns child states, the actions they require, and a cost of 1.

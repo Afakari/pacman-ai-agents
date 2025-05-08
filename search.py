@@ -101,22 +101,12 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return [s, s, w, s, w, w, s, w]
 
+# to run autograder just run
+# -> python3 autograder.py
 
+# q1: 4/4 grade
 # python3 ./pacman.py --layout bigMaze -p searchAgent -z 0.5 --frameTime 0.01
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
-
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
-
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    """
-    "*** YOUR CODE HERE ***"
     starting_node = problem.getStartState()
     if problem.isGoalState(starting_node):
         return []
@@ -140,11 +130,9 @@ def depthFirstSearch(problem):
                 queue.push((next_node, new_action))
     return []
 
-
+# q2: 4/4
 # python3 ./pacman.py --layout bigMaze -p searchAgent -a fn=bfs -z 0.5 --frameTime 0.01
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
     starting_node = problem.getStartState()
     if problem.isGoalState(starting_node):
         return []
@@ -161,41 +149,16 @@ def breadthFirstSearch(problem):
         if problem.isGoalState(current_node):
             return actions
 
+        visited_nodes.add(current_node)
         for next_node, next_action, _ in problem.expand(current_node):
             if next_node not in visited_nodes:
                 new_action = actions + [next_action]
                 queue.push((next_node, new_action))
-                visited_nodes.add(current_node)
     return []
 
 
 # python3 ./pacman.py --layout bigMaze -p searchAgent -a fn=ucs -z 0.5 --frameTime 0.01
 def uniformCostSearch(problem):
-    starting_node = problem.getStartState()
-    if problem.isGoalState(starting_node):
-        return []
-
-    visited_nodes = set()
-
-    priority_queue = util.PriorityQueue()
-    #  (node, action to node, cost to node),priority -> cost
-    priority_queue.push((starting_node, [], 0), 0)
-    while not priority_queue.isEmpty():
-        current_node, actions, cost = priority_queue.pop()
-        if current_node in visited_nodes:
-            continue
-        visited_nodes.add(current_node)
-        if problem.isGoalState(current_node):
-            return actions
-        for next_node, next_action, next_cost in problem.expand(current_node):
-            if next_node not in visited_nodes:
-                new_action = actions + [next_action]
-                new_cost = cost + next_cost
-                priority_queue.push((next_node, new_action, new_cost), new_cost)
-    return []
-
-
-def ucs_v2(problem):
     starting_node = problem.getStartState()
     if problem.isGoalState(starting_node):
         return []
@@ -228,30 +191,6 @@ def nullHeuristic(state, problem=None):
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    starting_node = problem.getStartState()
-    if problem.isGoalState(starting_node):
-        return []
-    visited_nodes = set()
-    priority_queue = util.PriorityQueue()
-    priority_queue.push((starting_node, [], 0), 0)
-
-    while not priority_queue.isEmpty():
-        current_node, actions, cost = priority_queue.pop()
-        if current_node in visited_nodes:
-            continue
-        visited_nodes.add(current_node)
-        if problem.isGoalState(current_node):
-            return actions
-        for next_node, next_action, next_cost in problem.expand(current_node):
-            if next_node not in visited_nodes:
-                new_action = actions + [next_action]
-                new_cost = cost + next_cost
-                new_heuristic = new_cost + heuristic(next_node, problem)
-                priority_queue.push((next_node, new_action, new_cost), new_heuristic)
-    return []
-
-def astar_v2(problem,heuristic=nullHeuristic):
     starting_node = problem.getStartState()
     if problem.isGoalState(starting_node):
         return []
@@ -271,14 +210,13 @@ def astar_v2(problem,heuristic=nullHeuristic):
             new_heuristic = new_cost + heuristic(next_node, problem)
             if next_node not in cost_so_far or new_heuristic < cost_so_far[next_node]:
                 new_actions = actions + [next_action]
-                cost_so_far[next_node] = new_heuristic
+                cost_so_far[next_node] = new_cost
                 priority_queue.push((next_node, new_actions, new_cost), new_heuristic)
     return []
-
 
 
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
-astar = astar_v2
-ucs = ucs_v2
+astar = aStarSearch
+ucs = uniformCostSearch

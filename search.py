@@ -229,12 +229,56 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    starting_node = problem.getStartState()
+    if problem.isGoalState(starting_node):
+        return []
+    visited_nodes = set()
+    priority_queue = util.PriorityQueue()
+    priority_queue.push((starting_node, [], 0), 0)
+
+    while not priority_queue.isEmpty():
+        current_node, actions, cost = priority_queue.pop()
+        if current_node in visited_nodes:
+            continue
+        visited_nodes.add(current_node)
+        if problem.isGoalState(current_node):
+            return actions
+        for next_node, next_action, next_cost in problem.expand(current_node):
+            if next_node not in visited_nodes:
+                new_action = actions + [next_action]
+                new_cost = cost + next_cost
+                new_heuristic = new_cost + heuristic(next_node, problem)
+                priority_queue.push((next_node, new_action, new_cost), new_heuristic)
+    return []
+
+def astar_v2(problem,heuristic=nullHeuristic):
+    starting_node = problem.getStartState()
+    if problem.isGoalState(starting_node):
+        return []
+    priority_queue = util.PriorityQueue()
+    priority_queue.push((starting_node, [], 0), 0)
+    cost_so_far = {starting_node: 0}
+
+    while not priority_queue.isEmpty():
+        current_node, actions, cost = priority_queue.pop()
+        if cost > cost_so_far.get(current_node, float("inf")):
+            continue
+        if problem.isGoalState(current_node):
+            return actions
+
+        for next_node, next_action, next_cost in problem.expand(current_node):
+            new_cost = next_cost + cost
+            new_heuristic = new_cost + heuristic(next_node, problem)
+            if next_node not in cost_so_far or new_heuristic < cost_so_far[next_node]:
+                new_actions = actions + [next_action]
+                cost_so_far[next_node] = new_heuristic
+                priority_queue.push((next_node, new_actions, new_cost), new_heuristic)
+    return []
+
 
 
 # Abbreviations
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
-astar = aStarSearch
-ucs = uniformCostSearch
+astar = astar_v2
+ucs = ucs_v2

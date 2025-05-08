@@ -118,22 +118,23 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     starting_node = problem.getStartState()
     if problem.isGoalState(starting_node):
-        return None
+        return []
 
     queue = util.Stack()
-    visited_nodes = []
+    visited_nodes = set()
 
     queue.push((starting_node, []))
 
     while not queue.isEmpty():
         current_node, actions = queue.pop()
-        if current_node not in visited_nodes:
-            visited_nodes.append(current_node)
+        if current_node in visited_nodes:
+            continue
+        visited_nodes.add(current_node)
+        if problem.isGoalState(current_node):
+            return actions
 
-            if problem.isGoalState(current_node):
-                return actions
-
-            for next_node, action, cost in problem.expand(current_node):
+        for next_node, action, _ in problem.expand(current_node):
+            if next_node not in visited_nodes:
                 new_action = actions + [action]
                 queue.push((next_node, new_action))
     return []
@@ -142,7 +143,28 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    starting_node = problem.getStartState()
+    if problem.isGoalState(starting_node):
+        return []
+
+    queue = util.Queue()
+    visited_nodes = set()
+    queue.push((starting_node, []))
+
+    while not queue.isEmpty():
+        current_node, actions = queue.pop()
+        if current_node in visited_nodes:
+            continue
+
+        if problem.isGoalState(current_node):
+            return actions
+
+        for next_node, next_action, _ in problem.expand(current_node):
+            if next_node not in visited_nodes:
+                new_action = actions + [next_action]
+                queue.push((next_node, new_action))
+                visited_nodes.add(current_node)
+    return []
 
 
 def nullHeuristic(state, problem=None):

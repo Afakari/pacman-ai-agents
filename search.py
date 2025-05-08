@@ -102,6 +102,7 @@ def tinyMazeSearch(problem):
     return [s, s, w, s, w, w, s, w]
 
 
+# python3 ./pacman.py --layout bigMaze -p searchAgent -z 0.5 --frameTime 0.01
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -140,6 +141,7 @@ def depthFirstSearch(problem):
     return []
 
 
+# python3 ./pacman.py --layout bigMaze -p searchAgent -a fn=bfs -z 0.5 --frameTime 0.01
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
@@ -167,6 +169,56 @@ def breadthFirstSearch(problem):
     return []
 
 
+# python3 ./pacman.py --layout bigMaze -p searchAgent -a fn=ucs -z 0.5 --frameTime 0.01
+def uniformCostSearch(problem):
+    starting_node = problem.getStartState()
+    if problem.isGoalState(starting_node):
+        return []
+
+    visited_nodes = set()
+
+    priority_queue = util.PriorityQueue()
+    #  (node, action to node, cost to node),priority -> cost
+    priority_queue.push((starting_node, [], 0), 0)
+    while not priority_queue.isEmpty():
+        current_node, actions, cost = priority_queue.pop()
+        if current_node in visited_nodes:
+            continue
+        visited_nodes.add(current_node)
+        if problem.isGoalState(current_node):
+            return actions
+        for next_node, next_action, next_cost in problem.expand(current_node):
+            if next_node not in visited_nodes:
+                new_action = actions + [next_action]
+                new_cost = cost + next_cost
+                priority_queue.push((next_node, new_action, new_cost), new_cost)
+    return []
+
+
+def ucs_v2(problem):
+    starting_node = problem.getStartState()
+    if problem.isGoalState(starting_node):
+        return []
+    priority_queue = util.PriorityQueue()
+    priority_queue.push((starting_node, [], 0), 0)
+    cost_so_far = {starting_node: 0}
+
+    while not priority_queue.isEmpty():
+        current_node, actions, cost = priority_queue.pop()
+        if cost > cost_so_far.get(current_node, float("inf")):
+            continue
+        if problem.isGoalState(current_node):
+            return actions
+
+        for next_node, next_action, next_cost in problem.expand(current_node):
+            new_cost = next_cost + cost
+            if next_node not in cost_so_far or new_cost < cost_so_far[next_node]:
+                cost_so_far[next_node] = new_cost
+                new_actions = actions + [next_action]
+                priority_queue.push((next_node, new_actions, new_cost), new_cost)
+    return []
+
+
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
@@ -185,3 +237,4 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 bfs = breadthFirstSearch
 dfs = depthFirstSearch
 astar = aStarSearch
+ucs = uniformCostSearch

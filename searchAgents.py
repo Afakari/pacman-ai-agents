@@ -336,7 +336,7 @@ def euclideanHeuristic(position, problem, info={}):
 # This portion is incomplete.  Time to write code!  #
 #####################################################
 
-
+# 3/3 with bfs
 class CornersProblem(search.SearchProblem):
     """
     This search problem finds paths through all four corners of a layout.
@@ -423,25 +423,65 @@ class CornersProblem(search.SearchProblem):
                 return 999999
         return len(actions)
 
-
+# 3/3
+# python3.11 pacman.py -l mediumCorners -z 0.5 -p SearchAgent -a fn=ucs,prob=CornersProblem,heuristic=cornersHeuristic
 def cornersHeuristic(state, problem):
     """
-    A heuristic for the CornersProblem that you defined.
-
-      state:   The current search state
-               (a data structure you chose in your search problem)
-
-      problem: The CornersProblem instance for this layout.
-
-    This function should always return a number that is a lower bound on the
-    shortest path from the state to a goal of the problem; i.e.  it should be
-    admissible (as well as consistent).
+    A heuristic for the CornersProblem.
+    Using Prim MST and manhattan distance per node to calculate the heuristic
+    https://www.askpython.com/python/examples/prims-algorithm-python
+    and geek for geeks for implementation of prims msf
     """
-    corners = problem.corners  # These are the corner coordinates
-    walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
+    position, visited_corners = state
+    all_problem_corners = problem.corners
+    # Create a list of unvisited corners
+    unvisited_corners = [c for c in all_problem_corners if c not in visited_corners]
 
-    "*** YOUR CODE HERE ***"
-    return 0  # Default to trivial solution
+    if not unvisited_corners:
+        return 0  # All corners visited, goal reached
+    num_points = len(unvisited_corners)
+    cost_matrix = [
+        [
+            util.manhattanDistance(unvisited_corners[i], unvisited_corners[j])
+            for j in range(num_points)
+        ]
+        for i in range(num_points)
+    ]
+    weight = [float("inf")] * num_points
+    parent = [-1] * num_points
+    in_mst = [False] * num_points
+
+    weight[0] = 0
+    total_weight = 0
+    for _ in range(num_points):
+        min_k_val = float("inf")
+        u = -1
+        for v_idx in range(num_points):
+            if not in_mst[v_idx] and weight[v_idx] < min_k_val:
+                min_k_val = weight[v_idx]
+                u = v_idx
+
+        if u == -1:
+            break
+
+        in_mst[u] = True
+        total_weight += min_k_val
+
+        for v_adj_idx in range(num_points):
+            if (
+                not in_mst[v_adj_idx]
+                and 0 < cost_matrix[u][v_adj_idx] < weight[v_adj_idx]
+            ):
+                weight[v_adj_idx] = cost_matrix[u][v_adj_idx]
+                parent[v_adj_idx] = u
+
+    min_dist = float("inf")
+    for corner in unvisited_corners:
+        dist = util.manhattanDistance(position, corner)
+        if dist < min_dist:
+            min_dist = dist
+
+    return total_weight + min_dist
 
 
 class AStarCornersAgent(SearchAgent):

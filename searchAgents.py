@@ -336,6 +336,7 @@ def euclideanHeuristic(position, problem, info={}):
 # This portion is incomplete.  Time to write code!  #
 #####################################################
 
+
 # 3/3 with bfs
 class CornersProblem(search.SearchProblem):
     """
@@ -423,23 +424,10 @@ class CornersProblem(search.SearchProblem):
                 return 999999
         return len(actions)
 
-# 3/3
-# python3.11 pacman.py -l mediumCorners -z 0.5 -p SearchAgent -a fn=ucs,prob=CornersProblem,heuristic=cornersHeuristic
-def cornersHeuristic(state, problem):
-    """
-    A heuristic for the CornersProblem.
-    Using Prim MST and manhattan distance per node to calculate the heuristic
-    https://www.askpython.com/python/examples/prims-algorithm-python
-    and geek for geeks for implementation of prims msf
-    """
-    position, visited_corners = state
-    all_problem_corners = problem.corners
-    # Create a list of unvisited corners
-    unvisited_corners = [c for c in all_problem_corners if c not in visited_corners]
 
-    if not unvisited_corners:
-        return 0  # All corners visited, goal reached
+def get_mst_cost(unvisited_corners):
     num_points = len(unvisited_corners)
+
     cost_matrix = [
         [
             util.manhattanDistance(unvisited_corners[i], unvisited_corners[j])
@@ -474,7 +462,26 @@ def cornersHeuristic(state, problem):
             ):
                 weight[v_adj_idx] = cost_matrix[u][v_adj_idx]
                 parent[v_adj_idx] = u
+    return total_weight
 
+
+# 3/3
+# python3.11 pacman.py -l mediumCorners -z 0.5 -p SearchAgent -a fn=ucs,prob=CornersProblem,heuristic=cornersHeuristic
+def cornersHeuristic(state, problem):
+    """
+    A heuristic for the CornersProblem.
+    Using Prim MST and manhattan distance per node to calculate the heuristic
+    https://www.askpython.com/python/examples/prims-algorithm-python
+    and geek for geeks for implementation of prims msf
+    """
+    position, visited_corners = state
+    all_problem_corners = problem.corners
+    # Create a list of unvisited corners
+    unvisited_corners = [c for c in all_problem_corners if c not in visited_corners]
+
+    if not unvisited_corners:
+        return 0  # All corners visited, goal reached
+    total_weight = get_mst_cost(unvisited_corners)
     min_dist = float("inf")
     for corner in unvisited_corners:
         dist = util.manhattanDistance(position, corner)
@@ -584,37 +591,66 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 
-def foodHeuristic(state, problem):
-    """
-    Your heuristic for the FoodSearchProblem goes here.
-
-    This heuristic must be consistent to ensure correctness.  First, try to come
-    up with an admissible heuristic; almost all admissible heuristics will be
-    consistent as well.
-
-    If using A* ever finds a solution that is worse uniform cost search finds,
-    your heuristic is *not* consistent, and probably not admissible!  On the
-    other hand, inadmissible or inconsistent heuristics may find optimal
-    solutions, so be careful.
-
-    The state is a tuple ( pacmanPosition, foodGrid ) where foodGrid is a Grid
-    (see game.py) of either True or False. You can call foodGrid.asList() to get
-    a list of food coordinates instead.
-
-    If you want access to info like walls, capsules, etc., you can query the
-    problem.  For example, problem.walls gives you a Grid of where the walls
-    are.
-
-    If you want to *store* information to be reused in other calls to the
-    heuristic, there is a dictionary called problem.heuristicInfo that you can
-    use. For example, if you only want to count the walls once and store that
-    value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
-    Subsequent calls to this heuristic can access
-    problem.heuristicInfo['wallCount']
-    """
+# 9k nodes, 3/4
+def foodHeuristic_v1(state, problem):
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    if not foodList:
+        return 0
+    num_food = len(foodList)
+    if num_food == 1:
+        return util.manhattanDistance(position, foodList[0])
+    distances = [util.manhattanDistance(position, food) for food in foodList]
+    return max(distances)
+
+
+# 8k nodes, 4/4
+def foodHeuristic_v2(state, problem):
+    position, foodGrid = state
+    foodList = foodGrid.asList()
+
+    if not foodList:
+        return 0
+    if len(foodList) == 1:
+        return util.manhattanDistance(position, foodList[0])
+
+    # find the closest food
+    min_dist_to_X = min(util.manhattanDistance(position, food) for food in foodList)
+
+    # find farthest from the closest food
+    closest_food = min(
+        foodList, key=lambda food: util.manhattanDistance(position, food)
+    )
+    # find actual distance
+    max_dist_from_X = max(
+        util.manhattanDistance(closest_food, food) for food in foodList
+    )
+    # pacman -> closest -> farthest
+    return min_dist_to_X + max_dist_from_X
+
+
+# TODO
+# im pretty sure i can get this to be under 7k
+# 7k nodes
+# 4/4 mst implementation
+def foodHeuristic_mst(state, problem):
+    position, foodGrid = state
+    foodList = foodGrid.asList()
+
+    if not foodList:
+        return 0
+
+    mst_cost_of_food = get_mst_cost(foodList)
+    min_dist_to_closest_food = float("inf")
+    for food_coord in foodList:
+        dist = util.manhattanDistance(position, food_coord)
+        if dist < min_dist_to_closest_food:
+            min_dist_to_closest_food = dist
+
+    return mst_cost_of_food + min_dist_to_closest_food
+
+
+foodHeuristic = foodHeuristic_mst
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -645,13 +681,9 @@ class ClosestDotSearchAgent(SearchAgent):
         gameState.
         """
         # Here are some useful elements of the startState
-        startPosition = gameState.getPacmanPosition()
-        food = gameState.getFood()
-        walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.bfs(problem)
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -686,9 +718,13 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x, y = state
-
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        distance, goal = min(
+            [(util.manhattanDistance(state, goal), goal) for goal in self.food.asList()]
+        )
+        if state == goal:
+            return True
+        else:
+            return False
 
 
 def mazeDistance(point1, point2, gameState):

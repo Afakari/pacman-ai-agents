@@ -425,9 +425,13 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
+from heapq import heappush, heappop
+
+
 def get_mst_cost(unvisited_corners):
     num_points = len(unvisited_corners)
-
+    if num_points == 0:
+        return 0
     cost_matrix = [
         [
             util.manhattanDistance(unvisited_corners[i], unvisited_corners[j])
@@ -438,30 +442,25 @@ def get_mst_cost(unvisited_corners):
     weight = [float("inf")] * num_points
     parent = [-1] * num_points
     in_mst = [False] * num_points
+    pq = []
 
     weight[0] = 0
+    heappush(pq, (0, 0))  # (weight, vertex)
     total_weight = 0
-    for _ in range(num_points):
-        min_k_val = float("inf")
-        u = -1
-        for v_idx in range(num_points):
-            if not in_mst[v_idx] and weight[v_idx] < min_k_val:
-                min_k_val = weight[v_idx]
-                u = v_idx
 
-        if u == -1:
-            break
-
+    while pq:
+        w, u = heappop(pq)
+        if in_mst[u]:
+            continue
         in_mst[u] = True
-        total_weight += min_k_val
+        total_weight += w
 
-        for v_adj_idx in range(num_points):
-            if (
-                not in_mst[v_adj_idx]
-                and 0 < cost_matrix[u][v_adj_idx] < weight[v_adj_idx]
-            ):
-                weight[v_adj_idx] = cost_matrix[u][v_adj_idx]
-                parent[v_adj_idx] = u
+        for v in range(num_points):
+            if not in_mst[v] and 0 < cost_matrix[u][v] < weight[v]:
+                weight[v] = cost_matrix[u][v]
+                parent[v] = u
+                heappush(pq, (weight[v], v))
+
     return total_weight
 
 

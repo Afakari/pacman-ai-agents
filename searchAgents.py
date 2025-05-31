@@ -36,6 +36,7 @@ Good luck and happy searching!
 
 import time
 
+import pacman
 import search
 import util
 from game import Actions
@@ -428,13 +429,16 @@ class CornersProblem(search.SearchProblem):
 from heapq import heappush, heappop
 
 
-def get_mst_cost(unvisited_corners):
+def get_mst_cost(unvisited_corners,gameState):
     num_points = len(unvisited_corners)
+    is_pacman_game_state = True if isinstance(gameState, pacman.GameState) else False
     if num_points == 0:
         return 0
     cost_matrix = [
         [
-            util.manhattanDistance(unvisited_corners[i], unvisited_corners[j])
+            mazeDistance(unvisited_corners[i], unvisited_corners[j], gameState)
+            if is_pacman_game_state
+            else util.manhattanDistance(unvisited_corners[i], unvisited_corners[j])
             for j in range(num_points)
         ]
         for i in range(num_points)
@@ -442,24 +446,24 @@ def get_mst_cost(unvisited_corners):
     weight = [float("inf")] * num_points
     parent = [-1] * num_points
     in_mst = [False] * num_points
-    pq = []
+    pq = util.PriorityQueue()
 
     weight[0] = 0
-    heappush(pq, (0, 0))  # (weight, vertex)
+    pq.push(0, 0)  # (weight, vertex)
     total_weight = 0
 
-    while pq:
-        w, u = heappop(pq)
+    while not pq.isEmpty():
+        u = pq.pop()
         if in_mst[u]:
             continue
         in_mst[u] = True
-        total_weight += w
+        total_weight += weight[u]
 
         for v in range(num_points):
             if not in_mst[v] and 0 < cost_matrix[u][v] < weight[v]:
                 weight[v] = cost_matrix[u][v]
                 parent[v] = u
-                heappush(pq, (weight[v], v))
+                pq.update(v,weight[v])
 
     return total_weight
 
@@ -480,7 +484,7 @@ def cornersHeuristic(state, problem):
 
     if not unvisited_corners:
         return 0  # All corners visited, goal reached
-    total_weight = get_mst_cost(unvisited_corners)
+    total_weight = get_mst_cost(unvisited_corners,problem)
     min_dist = float("inf")
     for corner in unvisited_corners:
         dist = util.manhattanDistance(position, corner)
@@ -639,10 +643,10 @@ def foodHeuristic_mst(state, problem):
     if not foodList:
         return 0
 
-    mst_cost_of_food = get_mst_cost(foodList)
+    mst_cost_of_food = get_mst_cost(foodList,problem.startingGameState)
     min_dist_to_closest_food = float("inf")
     for food_coord in foodList:
-        dist = util.manhattanDistance(position, food_coord)
+        dist = mazeDistance(position, food_coord,problem.startingGameState)
         if dist < min_dist_to_closest_food:
             min_dist_to_closest_food = dist
 

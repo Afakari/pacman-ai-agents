@@ -7,12 +7,25 @@ This repository contains a series of intelligent agents developed for the classi
 The goal of this project is to develop AI agents that can navigate the Pacman game world efficiently, using different search algorithms and techniques. The agents are designed to solve specific problems, such as finding the shortest path, collecting all food, or escaping ghosts.
 
 The project is based on the [Berkeley AI Pacman Project](http://ai.berkeley.edu/search.html), which provides a framework for developing and testing AI agents in the Pacman environment.
-
+> This is the final grading i have achieved.
+```
+Provisional grades
+==================
+Question q1: 4/4
+Question q2: 4/4
+Question q3: 4/4
+Question q4: 3/3
+Question q5: 3/3
+Question q6: 5/4
+Question q7: 3/3
+------------------
+Total: 26/25
+```
 ## Getting Started
 
 ### Prerequisites
 
-- Python 3.x
+- Python 3.x >= 3.11
 - The Pacman framework provided by the Berkeley AI course.
 
 ### Installation
@@ -56,7 +69,6 @@ The following agents and algorithms are implemented in this project:
 - **Breadth-First Search (BFS)**
 - **Uniform Cost Search (UCS)**
 - **A* Search**
-- **Greedy Search**
 
 Each agent can be invoked using the appropriate command-line arguments. For example, to run the A* Search agent, use:
 
@@ -69,16 +81,13 @@ python pacman.py -l bigMaze -p SearchAgent -a fn=astar,heuristic=manhattanHeuris
 - `search.py`: Contains the implementation of various search algorithms.
 - `searchAgents.py`: Contains the implementation of the Pacman agents that use the search algorithms.
 - `pacman.py`: The main game file that runs the Pacman game with the specified agent and layout.
-- `layouts/`: Contains different maze layouts for the Pacman game.
 
 ## Grading
 
-The project is graded based on the performance of the agents in solving specific problems, such as:
-
-1. Finding the shortest path to the goal.
-2. Collecting all food in the maze.
-3. Escaping from ghosts.
-4. Implementing and comparing different search algorithms.
+The project is graded based on the performance of the agents in solving specific problems, the default grading mechanism can be done using:
+```angular2html
+python autograder.py
+```
 
 Each problem is associated with a specific question or task that needs to be solved by the agent. The grading criteria are based on the correctness and efficiency of the implemented algorithms.
 > ill add more in depth explain of the questions after i have solved them.

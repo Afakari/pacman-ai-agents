@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>گزارش حل پازل N تایی با A* و RBFS</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        @font-face {
+            font-family: 'B Nazanin';
+            src: url('https://cdn.fontcdn.ir/Font/Persian/B%20Nazanin/B%20Nazanin.eot');
+            src: url('https://cdn.fontcdn.ir/Font/Persian/B%20Nazanin/B%20Nazanin.eot?#iefix') format('embedded-opentype'),
+                 url('https://cdn.fontcdn.ir/Font/Persian/B%20Nazanin/B%20Nazanin.woff2') format('woff2'),
+                 url('https://cdn.fontcdn.ir/Font/Persian/B%20Nazanin/B%20Nazanin.woff') format('woff'),
+                 url('https://cdn.fontcdn.ir/Font/Persian/B%20Nazanin/B%20Nazanin.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'B Nazanin', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff; /* Formal white background */
+            color: #333333; /* Dark gray text */
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: #f9f9f9; /* Slightly off-white for content area */
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Softer shadow */
+        }
+
+        h1, h2, h3 {
+            color: #2c3e50; /* Dark blue/slate for headings */
+            border-bottom: 2px solid #bdc3c7; /* Light gray border */
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #16a085; /* Primary color for main title (e.g., teal) */
+        }
+
+        p, li {
+            font-size: 1.1em;
+            color: #555555; /* Medium gray for paragraphs */
+        }
+
+        /* Code block styling (Catppuccin-like) */
+        pre {
+            background-color: #1e1e2e; /* Catppuccin Base */
+            color: #cdd6f4; /* Catppuccin Text */
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.95em;
+            border: 1px solid #313244; /* Catppuccin Surface1 */
+            direction: ltr; /* LTR for code */
+            text-align: left; /* Align code to the left */
+        }
+
+        pre code .keyword { color: #89b4fa; /* Blue */ font-weight: bold; }
+        pre code .comment { color: #6c7086; /* Overlay0 */ font-style: italic; }
+        pre code .string { color: #a6e3a1; /* Green */ }
+        pre code .number { color: #fab387; /* Peach */ }
+        pre code .function { color: #94e2d5; /* Teal */ }
+        pre code .class-name { color: #f38ba8; /* Maroon/Red */ font-weight: bold;}
+        pre code .decorator { color: #f9e2af; /* Yellow */ }
+        pre code .operator { color: #cba6f7; /* Mauve */ }
+        pre code .self { color: #f38ba8; /* Red */ font-style: italic; }
+
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background-color: #f0f0f0; /* Light gray for result items to fit the formal theme */
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cccccc; 
+            text-align: center;
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 2px solid #bbbbbb; 
+        }
+        .result-item p {
+            font-size: 0.9em;
+            color: #444444; 
+            margin-top: 5px;
+        }
+        .result-item h3 {
+             color: #34495e; /* Slightly darker blue for subheadings in result items */
+             border-bottom: none;
+             margin-bottom:10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #ffffff;
+        }
+        th, td {
+            border: 1px solid #dddddd; /* Lighter border for table */
+            padding: 12px;
+            text-align: right;
+            color: #333333;
+        }
+        th {
+            background-color: #e9ecef; /* Light gray for table header */
+            color: #2c3e50; /* Dark blue/slate for table header text */
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa; /* Very light gray for even rows */
+        }
+
+        .note {
+            background-color: #fff3cd; /* Light yellow for notes */
+            color: #856404; /* Dark yellow/brown text for notes */
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #ffeeba; /* Yellow border for notes */
+        }
+        .note strong {
+            color: #664d03; /* Darker text for strong emphasis in notes */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>حل پازل N تایی با الگوریتم‌های A* و RBFS</h1>
+
+        <p>این سند به بررسی و مقایسه دو الگوریتم جستجوی آگاهانه، A* (اِی استار) و RBFS (جستجوی بازگشتی بهترین-اولین)، برای حل مسئله‌ی پازل N تایی می‌پردازد. هدف، ارزیابی عملکرد این دو الگوریتم از نظر حافظه مصرفی، سرعت اجرا و تعداد گره‌های گسترش‌یافته با افزایش اندازه‌ی پازل (N) است.</p>
+
+        <h2>مقدمه‌ای بر پازل N تایی</h2>
+        <p>پازل N تایی یک پازل کلاسیک است که شامل یک قاب از $N \times N-1$ کاشی مربع شماره‌گذاری شده در یک قاب $N \times N$ است که یک خانه آن خالی است. هدف این است که با حرکت دادن کاشی‌ها به فضای خالی، پازل را از یک حالت اولیه به یک حالت هدف مرتب‌شده برسانیم.</p>
+
+        <h2>الگوریتم‌های مورد استفاده</h2>
+        
+        <h3>1. الگوریتم A* (A-Star)</h3>
+        <p>A* یک الگوریتم جستجوی گراف است که مسیر با کمترین هزینه را از گره شروع به گره هدف پیدا می‌کند. این الگوریتم از یک تابع هیوریستیک برای تخمین هزینه از گره فعلی تا هدف استفاده می‌کند. تابع ارزیابی $f(n)$ برای هر گره $n$ به صورت زیر تعریف می‌شود:</p>
+        <div style="text-align: center;">$$f(n) = g(n) + h(n)$$</div>
+        <p>که در آن:</p>
+        <ul>
+            <li>$g(n)$: هزینه واقعی مسیر از گره شروع تا گره $n$.</li>
+            <li>$h(n)$: تخمین هیوریستیک هزینه از گره $n$ تا گره هدف. در این پروژه از فاصله منهتن استفاده شده است.</li>
+        </ul>
+        <p>A* با گسترش گره‌ای که کمترین مقدار $f(n)$ را دارد، بهینه بودن را تضمین می‌کند (اگر هیوریستیک admisssible باشد، یعنی هرگز هزینه واقعی را بیش از حد تخمین نزند).</p>
+
+        <h3>2. الگوریتم RBFS (Recursive Best-First Search)</h3>
+        <p>RBFS یک الگوریتم جستجوی بهترین-اولین بازگشتی است که سعی می‌کند عملکرد A* را با حافظه خطی شبیه‌سازی کند. این الگوریتم از یک مقدار آستانه $f_{\text{limit}}$ استفاده می‌کند و مسیرهایی را که از این آستانه فراتر می‌روند، به‌طور موقت کنار می‌گذارد و بعداً با آستانه جدید (هزینه بهترین مسیر جایگزین) دوباره بررسی می‌کند. این روش به کاهش مصرف حافظه کمک می‌کند، اما ممکن است منجر به بازگسترش مکرر گره‌ها شود.</p>
+
+        <h2>مروری بر پیاده‌سازی</h2>
+        <p>برنامه با استفاده از زبان پایتون پیاده‌سازی شده است. بخش‌های کلیدی کد شامل موارد زیر است:</p>
+        <ul>
+            <li>کلاس <code>PuzzleState</code>: برای نمایش وضعیت پازل، حرکات انجام‌شده، محاسبه فاصله منهتن و تابع هزینه $f$.</li>
+            <li>تابع <code>a_star_search</code>: پیاده‌سازی الگوریتم A*.</li>
+            <li>توابع <code>solve_rbfs</code> و <code>_rbfs_recursive</code>: پیاده‌سازی الگوریتم RBFS.</li>
+            <li>تابع هیوریستیک: فاصله منهتن به عنوان تابع هیوریستیک استفاده شده است.</li>
+        </ul>
+
+        <h3>نمونه کد: کلاس `PuzzleState` (بخشی)</h3>
+        <pre><code class="language-python">
+<span class="keyword">class</span> <span class="class-name">PuzzleState</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="self">self</span>, board: List[List[int]], size: int, moves: int = <span class="number">0</span>, parent: Optional[<span class="string">'PuzzleState'</span>] = <span class="keyword">None</span>):
+        <span class="self">self</span>.board = board
+        <span class="self">self</span>.size = size
+        <span class="self">self</span>.moves = moves
+        <span class="self">self</span>.parent = parent
+        <span class="self">self</span>.blank_pos = <span class="self">self</span>._find_blank()
+        <span class="self">self</span>.manhattan = <span class="self">self</span>._calculate_manhattan()
+        <span class="self">self</span>.f_cost_value: float = <span class="number">0.0</span> <span class="comment"># Used by RBFS</span>
+
+    <span class="keyword">def</span> <span class="function">_calculate_manhattan</span>(<span class="self">self</span>) -> int:
+        total_distance = <span class="number">0</span>
+        <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="self">self</span>.size):
+            <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="self">self</span>.size):
+                value = <span class="self">self</span>.board[i][j]
+                <span class="keyword">if</span> value != <span class="number">0</span>:
+                    target_row = (value - <span class="number">1</span>) // <span class="self">self</span>.size
+                    target_col = (value - <span class="number">1</span>) % <span class="self">self</span>.size
+                    total_distance += abs(i - target_row) + abs(j - target_col)
+        <span class="keyword">return</span> total_distance
+
+    <span class="keyword">def</span> <span class="function">f_cost</span>(<span class="self">self</span>) -> int:
+        <span class="comment">"""Calculates the f-cost (g + h) for A*."""</span>
+        <span class="keyword">return</span> <span class="self">self</span>.moves + <span class="self">self</span>.manhattan
+
+    <span class="keyword">def</span> <span class="function">__lt__</span>(<span class="self">self</span>, other: <span class="string">'PuzzleState'</span>) -> bool:
+        <span class="comment">"""Comparison for priority queue in A*."""</span>
+        <span class="keyword">return</span> <span class="self">self</span>.f_cost() < other.f_cost()
+        </code></pre>
+
+        <h2>مقایسه نتایج A* و RBFS</h2>
+        <p>در این بخش، نتایج اجرای دو الگوریتم بر روی پازل‌های با اندازه‌های مختلف (N) ارائه شده است. معیار‌های مقایسه شامل زمان اجرا، حافظه مصرفی و تعداد گره‌های گسترش‌یافته می‌باشد.</p>
+        
+        <div class="note">
+            <strong>توجه:</strong> تصاویر زیر نتایج اجرای برنامه را نشان می‌دهند. برای مشاهده صحیح، اطمینان حاصل کنید که فایل‌های تصویری با نام‌های ذکر شده در همان پوشه‌ی فایل HTML قرار دارند.
+        </div>
+
+        <div class="results-grid">
+            <div class="result-item">
+                <h3>پازل 2x2</h3>
+                <img src="img/2*2-8.png" alt="نتیجه پازل 2x2">
+            </div>
+            <div class="result-item">
+                <h3>پازل 3x3</h3>
+                <img src="img/3*3-27.png" alt="نتیجه پازل 3x3">
+            </div>
+            <div class="result-item">
+                <h3>پازل 4x4</h3>
+                <img src="img/3*3-200.png" alt="نتیجه پازل 4x4">
+            </div>
+            <div class="result-item">
+                <h3>پازل 5x5 (60 حرکت اولیه)</h3>
+                <img src="img/5*5-80.png" alt="نتیجه پازل 5x5 با 60 حرکت">
+            </div>
+             <div class="result-item">
+                <h3>پازل 5x5 (90 حرکت اولیه)</h3>
+                <img src="img/5*5-120.png" alt="نتیجه پازل 5x5 با 90 حرکت">
+            </div>
+            <div class="result-item">
+                <h3>پازل 6x6</h3>
+                <img src="img/6*6-120.png" alt="نتیجه پازل 6x6">
+            </div>
+        </div>
+
+        <h3>تحلیل نتایج (بر اساس تصاویر)</h3>
+        <p>با توجه به نتایج مشاهده‌شده در تصاویر:</p>
+        <ul>
+            <li><strong>زمان اجرا:</strong> به طور کلی، با افزایش اندازه پازل (N)، زمان اجرای هر دو الگوریتم افزایش می‌یابد. برای پازل‌های کوچکتر، تفاوت زمان ممکن است ناچیز باشد. در پازل‌های بزرگتر، A* ممکن است به دلیل نیاز به نگهداری لیست باز (open list) بزرگتر، کندتر عمل کند، اما RBFS نیز به دلیل بازگسترش گره‌ها می‌تواند زمان‌بر باشد. معمولا RBFS در زمان بهتر عمل میکند اما در تعداد گره های گسترش یافته، عملکرد ضعیف تری دارد.</li>
+            <li><strong>حافظه مصرفی:</strong> A* به دلیل نگهداری تمام گره‌های گسترش‌یافته در لیست باز و بسته، حافظه زیادی مصرف می‌کند و با افزایش N، این مصرف به شدت افزایش می‌یابد (مصرف حافظه نمایی). RBFS با رویکرد بازگشتی و محدودیت عمق، حافظه بسیار کمتری مصرف می‌کند (معمولاً خطی نسبت به عمق جواب). تصاویر باید این تفاوت را به وضوح نشان دهند، هرچند که در این پیاده سازی، حافظه برای هر دو تقریبا یکسان بوده است. این ممکن است به دلیل محدودیت های پکیج `psutil` و نحوه محاسبه آن در این کد باشد؛ در تئوری، تفاوت مصرف حافظه بین A* و RBFS برای مسائل بزرگ قابل توجه است.</li>
+            <li><strong>تعداد گره‌های گسترش‌یافته:</strong> A* معمولاً تعداد گره‌های کمتری را نسبت به RBFS گسترش می‌دهد زیرا هر گره را حداکثر یک بار بررسی می‌کند (اگر هیوریستیک consistent باشد). RBFS ممکن است گره‌ها را چندین بار بازگسترش دهد، بنابراین تعداد کل گره‌های گسترش‌یافته آن می‌تواند بیشتر باشد، به خصوص در فضاهای جستجوی پیچیده. تصاویر این مورد را به خوبی نمایش می دهند.</li>
+        </ul>
+
+        <h3>جدول خلاصه مقایسه (بر اساس نتایج پازل 4x4)</h3>
+        <p>این جدول داده‌های مربوط به اجرای الگوریتم‌ها بر روی پازل 4x4 را نشان می‌دهد (برگرفته از تصویر <code>Screenshot from 2025-06-05 21-50-49.png</code>):</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>معیار</th>
+                    <th>A* (پازل 4x4)</th>
+                    <th>RBFS (پازل 4x4)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>زمان اجرا (ثانیه)</td>
+                    <td>0.0244</td>
+                    <td>0.2304</td>
+                </tr>
+                <tr>
+                    <td>حافظه مصرفی (MB)</td>
+                    <td>22.25</td>
+                    <td>22.25</td>
+                </tr>
+                <tr>
+                    <td>تعداد گره‌های گسترش‌یافته</td>
+                    <td>689</td>
+                    <td>8,116</td>
+                </tr>
+                 <tr>
+                    <td>طول مسیر جواب</td>
+                    <td>22</td>
+                    <td>22</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h2>نمونه کد: الگوریتم A* (بخش اصلی)</h2>
+        <pre><code class="language-python">
+<span class="keyword">def</span> <span class="function">a_star_search</span>(initial_board: List[List[int]], size: int) -> Tuple[Optional[PuzzleState], float, float, int]:
+    start_time = time.time()
+    nodes_expanded = <span class="number">0</span>
+    memory_used = <span class="number">-1.0</span>
+    <span class="comment"># ... (memory tracking setup) ...</span>
+
+    initial_state = PuzzleState(initial_board, size)
+    goal_state_board = get_goal_board(size)
+    goal_key = PuzzleState(goal_state_board, size).__hash__()
+
+    open_list: List[PuzzleState] = [initial_state]
+    heapq.heapify(open_list)
+    closed_set: PySet[int] = set()
+
+    <span class="keyword">while</span> open_list:
+        current_state = heapq.heappop(open_list)
+        current_key = current_state.__hash__()
+
+        <span class="keyword">if</span> current_key == goal_key:
+            <span class="comment"># ... (calculate memory) ...</span>
+            <span class="keyword">return</span> current_state, time.time() - start_time, memory_used, nodes_expanded
+
+        <span class="keyword">if</span> current_key <span class="keyword">in</span> closed_set:
+            <span class="keyword">continue</span>
+        closed_set.add(current_key)
+
+        nodes_expanded += <span class="number">1</span>
+        <span class="keyword">for</span> neighbor <span class="keyword">in</span> get_neighbors(current_state):
+            <span class="keyword">if</span> neighbor.__hash__() <span class="keyword">not</span> <span class="keyword">in</span> closed_set:
+                heapq.heappush(open_list, neighbor)
+    
+    <span class="comment"># ... (calculate memory if no solution) ...</span>
+    <span class="keyword">return</span> <span class="keyword">None</span>, time.time() - start_time, memory_used, nodes_expanded
+        </code></pre>
+
+        <h2>نمونه کد: الگوریتم RBFS (بخش بازگشتی)</h2>
+        <pre><code class="language-python">
+<span class="keyword">def</span> <span class="function">_rbfs_recursive</span>(
+        state: PuzzleState,
+        goal_key: Tuple[Tuple[int, ...], ...],
+        f_limit: float,
+        nodes_expanded_counter: List[int]
+) -> Tuple[Optional[PuzzleState], float]:
+    current_state_key = _get_board_tuple_key(state.board)
+    <span class="keyword">if</span> current_state_key == goal_key:
+        <span class="keyword">return</span> state, state.f_cost_value
+
+    nodes_expanded_counter[<span class="number">0</span>] += <span class="number">1</span>
+
+    successors = get_neighbors(state)
+    <span class="keyword">if</span> <span class="keyword">not</span> successors:
+        <span class="keyword">return</span> <span class="keyword">None</span>, float(<span class="string">'inf'</span>)
+
+    <span class="keyword">for</span> s_node <span class="keyword">in</span> successors:
+        s_node.f_cost_value = max(s_node.moves + s_node.manhattan, state.f_cost_value)
+
+    <span class="keyword">while</span> <span class="keyword">True</span>:
+        successors.sort(key=<span class="keyword">lambda</span> x: x.f_cost_value)
+        best_successor = successors[<span class="number">0</span>]
+
+        <span class="keyword">if</span> best_successor.f_cost_value > f_limit:
+            <span class="keyword">return</span> <span class="keyword">None</span>, best_successor.f_cost_value
+
+        alternative_f_value = successors[<span class="number">1</span>].f_cost_value <span class="keyword">if</span> len(successors) > <span class="number">1</span> <span class="keyword">else</span> float(<span class="string">'inf'</span>)
+
+        result_state, best_f_updated = _rbfs_recursive(
+            best_successor,
+            goal_key,
+            min(f_limit, alternative_f_value),
+            nodes_expanded_counter
+        )
+        best_successor.f_cost_value = best_f_updated
+
+        <span class="keyword">if</span> result_state <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:
+            <span class="keyword">return</span> result_state, best_f_updated
+        </code></pre>
+        
+        <h2>نتیجه‌گیری</h2>
+        <p>هر دو الگوریتم A* و RBFS قادر به حل مسئله پازل N تایی هستند. انتخاب بین این دو الگوریتم به محدودیت‌های مسئله بستگی دارد:</p>
+        <ul>
+            <li><strong>A*</strong>: اگر حافظه کافی در دسترس باشد و پیدا کردن مسیر بهینه با کمترین تعداد گره گسترش‌یافته اولویت داشته باشد، A* انتخاب مناسبی است. اما برای پازل‌های بزرگ، مصرف حافظه آن می‌تواند مشکل‌ساز شود.</li>
+            <li><strong>RBFS</strong>: اگر محدودیت حافظه وجود داشته باشد، RBFS گزینه بهتری است زیرا حافظه بسیار کمتری مصرف می‌کند. با این حال، این کاهش مصرف حافظه به قیمت افزایش تعداد گره‌های گسترش‌یافته (به دلیل بازگشت و بازبینی مسیرها) و گاهی اوقات زمان اجرای بیشتر تمام می‌شود.</li>
+        </ul>
+        <p>در عمل، برای پازل‌های بسیار بزرگ، الگوریتم‌هایی مانند IDA* (Iterative Deepening A*) که ترکیبی از مزایای A* و جستجوی عمقی تکرارشونده هستند، ممکن است کارایی بهتری داشته باشند.</p>
+    </div>
+</body>
+</html>
+

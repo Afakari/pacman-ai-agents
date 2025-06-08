@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html dir="rtl" lang="fa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>گزارش حل پازل N تایی با A* و RBFS</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+          rel="stylesheet">
     <style>
         @font-face {
             font-family: 'B Nazanin';
@@ -71,94 +72,236 @@
             text-align: left;
         }
 
-        pre code .keyword { color: #cba6f7; font-weight: bold; }
-        pre code .comment { color: #6c7086; font-style: italic; }
-        pre code .string { color: #a6e3a1; }
-        pre code .number { color: #fab387; }
-        pre code .function { color: #89dceb; }
-        pre code .class-name { color: #f5c2e7; font-weight: bold; }
-        pre code .decorator { color: #f9e2af; }
-        pre code .operator { color: #94e2d5; }
-        pre code .self { color: #eba0ac; font-style: italic; }
-        pre code .builtin { color: #f38ba8; }
-        pre code .parameter { color: #cdd6f4; }
-        pre code .constant { color: #b4befe; }
+        pre code .keyword {
+            color: #cba6f7;
+            font-weight: bold;
+        }
 
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
-        .result-item { background-color: #f0f0f0; padding: 15px; border-radius: 8px; border: 1px solid #cccccc; text-align: center; }
-        .result-item img { max-width: 100%; height: auto; border-radius: 6px; margin-bottom: 10px; border: 2px solid #bbbbbb; }
-        .result-item p { font-size: 0.9em; color: #444444; margin-top: 5px; }
-        .result-item h3 { color: #34495e; border-bottom: none; margin-bottom: 10px; }
+        pre code .comment {
+            color: #6c7086;
+            font-style: italic;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #ffffff; }
-        th, td { border: 1px solid #dddddd; padding: 12px; text-align: right; color: #333333; }
-        th { background-color: #e9ecef; color: #2c3e50; font-weight: bold; }
-        tr:nth-child(even) { background-color: #f8f9fa; }
-        tr:hover { background-color: #e0e0e0; }
-        .result-item:hover { background-color: #e0e0e0; transform: scale(1.02); transition: all 0.2s; }
+        pre code .string {
+            color: #a6e3a1;
+        }
 
-        .note { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #ffeeba; }
-        .note strong { color: #664d03; }
+        pre code .number {
+            color: #fab387;
+        }
 
-        canvas { max-width: 100%; margin: 20px 0; }
+        pre code .function {
+            color: #89dceb;
+        }
+
+        pre code .class-name {
+            color: #f5c2e7;
+            font-weight: bold;
+        }
+
+        pre code .decorator {
+            color: #f9e2af;
+        }
+
+        pre code .operator {
+            color: #94e2d5;
+        }
+
+        pre code .self {
+            color: #eba0ac;
+            font-style: italic;
+        }
+
+        pre code .builtin {
+            color: #f38ba8;
+        }
+
+        pre code .parameter {
+            color: #cdd6f4;
+        }
+
+        pre code .constant {
+            color: #b4befe;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cccccc;
+            text-align: center;
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 2px solid #bbbbbb;
+        }
+
+        .result-item p {
+            font-size: 0.9em;
+            color: #444444;
+            margin-top: 5px;
+        }
+
+        .result-item h3 {
+            color: #34495e;
+            border-bottom: none;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #ffffff;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 12px;
+            text-align: right;
+            color: #333333;
+        }
+
+        th {
+            background-color: #e9ecef;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+        }
+
+        .result-item:hover {
+            background-color: #e0e0e0;
+            transform: scale(1.02);
+            transition: all 0.2s;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #ffeeba;
+        }
+
+        .note strong {
+            color: #664d03;
+        }
+
+        canvas {
+            max-width: 100%;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>حل پازل N تایی با الگوریتم‌های A* و RBFS</h1>
-    <p>این سند به بررسی و مقایسه دو الگوریتم جستجوی آگاهانه، A* (اِی استار) و RBFS (جستجوی بازگشتی بهترین-اولین)، برای حل مسئله‌ی پازل N تایی می‌پردازد. هدف، ارزیابی عملکرد این دو الگوریتم از نظر حافظه مصرفی، سرعت اجرا، و تعداد گره‌های گسترش‌یافته با افزایش اندازه‌ی پازل (\(N\)) و تعداد حرکات تصادفی (scramble amount) است.</p>
+    <p>این سند به بررسی و مقایسه دو الگوریتم جستجوی آگاهانه، A* (اِی استار) و RBFS (جستجوی بازگشتی بهترین-اولین)، برای
+        حل مسئله‌ی پازل N تایی می‌پردازد. هدف، ارزیابی عملکرد این دو الگوریتم از نظر حافظه مصرفی، سرعت اجرا، و تعداد
+        گره‌های گسترش‌یافته با افزایش اندازه‌ی پازل (\(N\)) و تعداد حرکات تصادفی (scramble amount) است.</p>
 
     <h2>مقدمه‌ای بر پازل N تایی</h2>
-    <p>پازل N تایی یک پازل کلاسیک است که شامل یک قاب \(N \times N\) با \(N^2 - 1\) کاشی شماره‌گذاری‌شده و یک خانه خالی است. هدف این است که با حرکت دادن کاشی‌ها به فضای خالی، پازل را از یک حالت اولیه به یک حالت هدف مرتب‌شده برسانیم.</p>
+    <p>پازل N تایی یک پازل کلاسیک است که شامل یک قاب \(N \times N\) با \(N^2 - 1\) کاشی شماره‌گذاری‌شده و یک خانه خالی
+        است. هدف این است که با حرکت دادن کاشی‌ها به فضای خالی، پازل را از یک حالت اولیه به یک حالت هدف مرتب‌شده
+        برسانیم.</p>
 
     <h2>الگوریتم‌های مورد استفاده</h2>
     <h3>1. الگوریتم A* (A-Star)</h3>
-    <p>A* یک الگوریتم جستجوی گراف است که مسیر با کمترین هزینه را از گره شروع به گره هدف پیدا می‌کند. این الگوریتم از یک تابع هیوریستیک برای تخمین هزینه از گره فعلی تا هدف استفاده می‌کند. تابع ارزیابی \(f(n)\) برای هر گره \(n\) به صورت زیر تعریف می‌شود:</p>
+    <p>A* یک الگوریتم جستجوی گراف است که مسیر با کمترین هزینه را از گره شروع به گره هدف پیدا می‌کند. این الگوریتم از یک
+        تابع هیوریستیک برای تخمین هزینه از گره فعلی تا هدف استفاده می‌کند. تابع ارزیابی \(f(n)\) برای هر گره \(n\) به
+        صورت زیر تعریف می‌شود:</p>
     <div style="text-align: center;">$$f(n) = g(n) + h(n)$$</div>
-    <p>که در آن: \(g(n)\) هزینه واقعی مسیر از شروع تا گره \(n\) و \(h(n)\) تخمین هیوریستیک هزینه از گره \(n\) تا هدف است. A* بهینه بودن را تضمین می‌کند اگر هیوریستیک آن admissible باشد.</p>
+    <p>که در آن: \(g(n)\) هزینه واقعی مسیر از شروع تا گره \(n\) و \(h(n)\) تخمین هیوریستیک هزینه از گره \(n\) تا هدف
+        است. A* بهینه بودن را تضمین می‌کند اگر هیوریستیک آن admissible باشد.</p>
 
     <h3>2. الگوریتم RBFS (Recursive Best-First Search)</h3>
-    <p>RBFS یک الگوریتم جستجوی بهترین-اولین بازگشتی است که سعی می‌کند عملکرد A* را با حافظه خطی شبیه‌سازی کند. این الگوریتم از یک مقدار آستانه \(f_{\text{limit}}\) استفاده می‌کند و مسیرهایی را که از این آستانه فراتر می‌روند، به‌طور موقت کنار می‌گذارد. این روش مصرف حافظه را کاهش می‌دهد اما ممکن است منجر به بازگسترش مکرر گره‌ها شود.</p>
+    <p>RBFS یک الگوریتم جستجوی بهترین-اولین بازگشتی است که سعی می‌کند عملکرد A* را با حافظه خطی شبیه‌سازی کند. این
+        الگوریتم از یک مقدار آستانه \(f_{\text{limit}}\) استفاده می‌کند و مسیرهایی را که از این آستانه فراتر می‌روند،
+        به‌طور موقت کنار می‌گذارد. این روش مصرف حافظه را کاهش می‌دهد اما ممکن است منجر به بازگسترش مکرر گره‌ها شود.</p>
 
     <h2>مروری بر پیاده‌سازی</h2>
-    <p>برنامه با استفاده از زبان پایتون و کتابخانه‌هایی مانند <code>psutil</code> برای نظارت بر منابع و <code>rich</code> برای نمایش خروجی پیاده‌سازی شده است. در ادامه، بخش‌های کلیدی کد مرور می‌شوند.</p>
+    <p>برنامه با استفاده از زبان پایتون و کتابخانه‌هایی مانند <code>psutil</code> برای نظارت بر منابع و
+        <code>rich</code> برای نمایش خروجی پیاده‌سازی شده است. در ادامه، بخش‌های کلیدی کد مرور می‌شوند.</p>
 
     <h3>کلاس <code>PuzzleState</code></h3>
-    <p>فاصله منهتن به‌عنوان تابع هیوریستیک استفاده می‌شود و مجموع فواصل عمودی و افقی هر کاشی از موقعیت هدفش را محاسبه می‌کند. این هیوریستیک admissible است، زیرا هزینه واقعی حرکت کاشی‌ها را بیش از حد تخمین نمی‌زند.</p>
-    <p>این کلاس وضعیت یک گره در فضای جستجو را نمایش می‌دهد. این کلاس شامل خود بورد پازل، تعداد حرکات تا اینجا (هزینه \(g\))، و ارجاع به گره والد برای بازسازی مسیر است. همچنین تابع هزینه \(f(n)\) و فاصله منهتن در این کلاس محاسبه می‌شوند.</p>
+    <p>فاصله منهتن به‌عنوان تابع هیوریستیک استفاده می‌شود و مجموع فواصل عمودی و افقی هر کاشی از موقعیت هدفش را محاسبه
+        می‌کند. این هیوریستیک admissible است، زیرا هزینه واقعی حرکت کاشی‌ها را بیش از حد تخمین نمی‌زند.</p>
+    <p>این کلاس وضعیت یک گره در فضای جستجو را نمایش می‌دهد. این کلاس شامل خود بورد پازل، تعداد حرکات تا اینجا (هزینه
+        \(g\))، و ارجاع به گره والد برای بازسازی مسیر است. همچنین تابع هزینه \(f(n)\) و فاصله منهتن در این کلاس محاسبه
+        می‌شوند.</p>
     <pre><code class="language-python">
 <span class="keyword">class</span> <span class="class-name">PuzzleState</span>:
-    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="self">self</span>, board: <span class="builtin">List</span>[<span class="builtin">List</span>[<span class="builtin">int</span>]], size: <span class="builtin">int</span>, moves: <span class="builtin">int</span> = <span class="number">0</span>, parent: <span class="builtin">Optional</span>[<span class="string">'PuzzleState'</span>] = <span class="constant">None</span>):
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="self">self</span>, board: <span
+            class="builtin">List</span>[<span class="builtin">List</span>[<span
+            class="builtin">int</span>]], size: <span class="builtin">int</span>, moves: <span
+            class="builtin">int</span> = <span class="number">0</span>, parent: <span
+            class="builtin">Optional</span>[<span class="string">'PuzzleState'</span>] = <span
+            class="constant">None</span>):
         <span class="self">self</span>.board = board
         <span class="self">self</span>.size = size
         <span class="self">self</span>.moves = moves
         <span class="self">self</span>.parent = parent
         <span class="self">self</span>.manhattan = <span class="self">self</span>._calculate_manhattan()
-        <span class="self">self</span>.f_cost_value: <span class="builtin">float</span> = <span class="number">0.0</span> <span class="comment"># Used by RBFS</span>
+        <span class="self">self</span>.f_cost_value: <span class="builtin">float</span> = <span
+            class="number">0.0</span> <span class="comment"># Used by RBFS</span>
 
-    <span class="keyword">def</span> <span class="function">_calculate_manhattan</span>(<span class="self">self</span>) -> <span class="builtin">int</span>:
+    <span class="keyword">def</span> <span class="function">_calculate_manhattan</span>(<span class="self">self</span>) -> <span
+            class="builtin">int</span>:
         <span class="comment"># ... (Implementation as shown previously) ...</span>
         total_distance = <span class="number">0</span>
-        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span class="self">self</span>.size):
-            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(<span class="self">self</span>.size):
+        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="builtin">range</span>(<span
+            class="self">self</span>.size):
+            <span class="keyword">for</span> j <span class="keyword">in</span> <span class="builtin">range</span>(<span
+            class="self">self</span>.size):
                 value = <span class="self">self</span>.board[i][j]
                 <span class="keyword">if</span> value != <span class="number">0</span>:
-                    target_row = (value <span class="operator">-</span> <span class="number">1</span>) <span class="operator">//</span> <span class="self">self</span>.size
-                    target_col = (value <span class="operator">-</span> <span class="number">1</span>) <span class="operator">%</span> <span class="self">self</span>.size
-                    total_distance <span class="operator">+=</span> <span class="builtin">abs</span>(i <span class="operator">-</span> target_row) <span class="operator">+</span> <span class="builtin">abs</span>(j <span class="operator">-</span> target_col)
+                    target_row = (value <span class="operator">-</span> <span class="number">1</span>) <span
+            class="operator">//</span> <span class="self">self</span>.size
+                    target_col = (value <span class="operator">-</span> <span class="number">1</span>) <span
+            class="operator">%</span> <span class="self">self</span>.size
+                    total_distance <span class="operator">+=</span> <span class="builtin">abs</span>(i <span
+            class="operator">-</span> target_row) <span class="operator">+</span> <span
+            class="builtin">abs</span>(j <span class="operator">-</span> target_col)
         <span class="keyword">return</span> total_distance
 
-    <span class="keyword">def</span> <span class="function">f_cost</span>(<span class="self">self</span>) -> <span class="builtin">int</span>:
-        <span class="keyword">return</span> <span class="self">self</span>.moves <span class="operator">+</span> <span class="self">self</span>.manhattan
+    <span class="keyword">def</span> <span class="function">f_cost</span>(<span class="self">self</span>) -> <span
+            class="builtin">int</span>:
+        <span class="keyword">return</span> <span class="self">self</span>.moves <span class="operator">+</span> <span
+            class="self">self</span>.manhattan
 
-    <span class="keyword">def</span> <span class="function">__lt__</span>(<span class="self">self</span>, other: <span class="string">'PuzzleState'</span>) -> <span class="builtin">bool</span>:
+    <span class="keyword">def</span> <span class="function">__lt__</span>(<span class="self">self</span>, other: <span
+            class="string">'PuzzleState'</span>) -> <span class="builtin">bool</span>:
         <span class="keyword">return</span> <span class="self">self</span>.f_cost() <span class="operator"><</span> other.f_cost()
     </code></pre>
 
     <h3>الگوریتم A*</h3>
-    <p>پیاده‌سازی A* از یک صف اولویت (min-heap) برای مدیریت لیست باز (گره‌هایی که باید بررسی شوند) و یک مجموعه (set) برای لیست بسته (گره‌هایی که قبلاً بررسی شده‌اند) استفاده می‌کند تا از بررسی تکراری گره‌ها جلوگیری کند.</p>
+    <p>پیاده‌سازی A* از یک صف اولویت (min-heap) برای مدیریت لیست باز (گره‌هایی که باید بررسی شوند) و یک مجموعه (set)
+        برای لیست بسته (گره‌هایی که قبلاً بررسی شده‌اند) استفاده می‌کند تا از بررسی تکراری گره‌ها جلوگیری کند.</p>
     <pre><code class="language-python">
-<span class="keyword">def</span> <span class="function">a_star_search</span>(initial_board: <span class="builtin">List</span>[<span class="builtin">List</span>[<span class="builtin">int</span>]], size: <span class="builtin">int</span>) -> <span class="builtin">Tuple</span>[<span class="builtin">Optional</span>[<span class="class-name">PuzzleState</span>], <span class="builtin">float</span>, <span class="builtin">float</span>, <span class="builtin">int</span>]:
+<span class="keyword">def</span> <span class="function">a_star_search</span>(initial_board: <span
+            class="builtin">List</span>[<span class="builtin">List</span>[<span
+            class="builtin">int</span>]], size: <span class="builtin">int</span>) -> <span class="builtin">Tuple</span>[<span
+            class="builtin">Optional</span>[<span class="class-name">PuzzleState</span>], <span
+            class="builtin">float</span>, <span class="builtin">float</span>, <span class="builtin">int</span>]:
     <span class="comment"># ... (setup) ...</span>
     initial_state = <span class="class-name">PuzzleState</span>(initial_board, size)
     open_list: <span class="builtin">List</span>[<span class="class-name">PuzzleState</span>] = [initial_state]
@@ -177,22 +320,28 @@
 
         nodes_expanded <span class="operator">+=</span> <span class="number">1</span>
         <span class="keyword">for</span> neighbor <span class="keyword">in</span> get_neighbors(current_state):
-            <span class="keyword">if</span> <span class="builtin">hash</span>(neighbor) <span class="keyword">not in</span> closed_set:
+            <span class="keyword">if</span> <span class="builtin">hash</span>(neighbor) <span
+            class="keyword">not in</span> closed_set:
                 <span class="builtin">heapq</span>.heappush(open_list, neighbor)
 
-    <span class="keyword">return</span> <span class="constant">None</span>, <span class="comment">...</span> <span class="comment"># No solution found</span>
+    <span class="keyword">return</span> <span class="constant">None</span>, <span class="comment">...</span> <span
+            class="comment"># No solution found</span>
     </code></pre>
 
     <h3>الگوریتم RBFS</h3>
-    <p>تابع بازگشتی RBFS یک گره و یک محدودیت هزینه \(N \times (N-1)\) را می‌گیرد. این تابع فرزندان گره را بر اساس هزینه \(f\) مرتب کرده و به صورت بازگشتی بهترین فرزند را تا زمانی که هزینه آن از \(N \times (N-1)\) کمتر باشد، کاوش می‌کند. اگر مسیر فعلی بیش از حد گران شود، الگوریتم به عقب برمی‌گردد و مسیر جایگزین بعدی را امتحان می‌کند.</p>
+    <p>تابع بازگشتی RBFS یک گره و یک محدودیت هزینه \(N \times (N-1)\) را می‌گیرد. این تابع فرزندان گره را بر اساس هزینه
+        \(f\) مرتب کرده و به صورت بازگشتی بهترین فرزند را تا زمانی که هزینه آن از \(N \times (N-1)\) کمتر باشد، کاوش
+        می‌کند. اگر مسیر فعلی بیش از حد گران شود، الگوریتم به عقب برمی‌گردد و مسیر جایگزین بعدی را امتحان می‌کند.</p>
     <pre><code class="language-python">
-<span class="keyword">def</span> <span class="function">_rbfs_recursive</span>(state: <span class="class-name">PuzzleState</span>, f_limit: <span class="builtin">float</span>, ...):
+<span class="keyword">def</span> <span class="function">_rbfs_recursive</span>(state: <span class="class-name">PuzzleState</span>, f_limit: <span
+            class="builtin">float</span>, ...):
     <span class="keyword">if</span> state.is_goal():
         <span class="keyword">return</span> state, state.f_cost_value
 
     successors = get_neighbors(state)
     <span class="keyword">if not</span> successors:
-        <span class="keyword">return</span> <span class="constant">None</span>, <span class="builtin">float</span>(<span class="string">'inf'</span>)
+        <span class="keyword">return</span> <span class="constant">None</span>, <span class="builtin">float</span>(<span
+            class="string">'inf'</span>)
 
     <span class="keyword">for</span> s_node <span class="keyword">in</span> successors:
         s_node.f_cost_value = <span class="builtin">max</span>(s_node.moves <span class="operator">+</span> s_node.manhattan, state.f_cost_value)
@@ -204,14 +353,17 @@
         <span class="keyword">if</span> best_successor.f_cost_value > f_limit:
             <span class="keyword">return</span> <span class="constant">None</span>, best_successor.f_cost_value
 
-        alternative_f_value = successors[<span class="number">1</span>].f_cost_value <span class="keyword">if</span> <span class="builtin">len</span>(successors) > <span class="number">1</span> <span class="keyword">else</span> <span class="builtin">float</span>(<span class="string">'inf'</span>)
+        alternative_f_value = successors[<span class="number">1</span>].f_cost_value <span
+            class="keyword">if</span> <span class="builtin">len</span>(successors) > <span class="number">1</span> <span
+            class="keyword">else</span> <span class="builtin">float</span>(<span class="string">'inf'</span>)
 
         result_state, best_f_updated = _rbfs_recursive(
             best_successor, <span class="builtin">min</span>(f_limit, alternative_f_value), ...
         )
         best_successor.f_cost_value = best_f_updated
 
-        <span class="keyword">if</span> result_state <span class="keyword">is not</span> <span class="constant">None</span>:
+        <span class="keyword">if</span> result_state <span class="keyword">is not</span> <span
+            class="constant">None</span>:
             <span class="keyword">return</span> result_state, best_f_updated
     </code></pre>
 
@@ -219,26 +371,37 @@
     <h3>نحوه اندازه‌گیری معیارها</h3>
     <p>برای مقایسه عینی دو الگوریتم، معیارهای زیر به دقت اندازه‌گیری شدند:</p>
     <ul>
-        <li><strong>زمان اجرا (Time):</strong> با استفاده از ماژول <code>time</code> پایتون، زمان شروع و پایان هر الگوریتم ثبت و تفاوت آن‌ها به عنوان زمان کل اجرا گزارش می‌شود.</li>
-        <li><strong>حافظه مصرفی (Memory):</strong> با استفاده از کتابخانه <code>psutil</code>، میزان حافظه RSS (Resident Set Size) فرایند پایتون در پایان اجرای الگوریتم اندازه‌گیری می‌شود. این معیار نشان‌دهنده حافظه فیزیکی اشغال شده است.</li>
-        <li><strong>گره‌های گسترش‌یافته (Nodes Expanded):</strong> یک شمارنده در حلقه اصلی هر الگوریتم قرار داده شده است که هر بار یک گره از لیست باز برای تولید فرزندانش انتخاب می‌شود، یک واحد به آن اضافه می‌کند.</li>
+        <li><strong>زمان اجرا (Time):</strong> با استفاده از ماژول <code>time</code> پایتون، زمان شروع و پایان هر
+            الگوریتم ثبت و تفاوت آن‌ها به عنوان زمان کل اجرا گزارش می‌شود.
+        </li>
+        <li><strong>حافظه مصرفی (Memory):</strong> با استفاده از کتابخانه <code>psutil</code>، میزان حافظه RSS (Resident
+            Set Size) فرایند پایتون در پایان اجرای الگوریتم اندازه‌گیری می‌شود. این معیار نشان‌دهنده حافظه فیزیکی اشغال
+            شده است.
+        </li>
+        <li><strong>گره‌های گسترش‌یافته (Nodes Expanded):</strong> یک شمارنده در حلقه اصلی هر الگوریتم قرار داده شده است
+            که هر بار یک گره از لیست باز برای تولید فرزندانش انتخاب می‌شود، یک واحد به آن اضافه می‌کند.
+        </li>
         <li><strong>طول مسیر جواب (Path Length):</strong> تعداد حرکات لازم برای رسیدن از حالت اولیه به حالت هدف.</li>
     </ul>
 
     <h3>ارائه خروجی با کتابخانه Rich</h3>
-    <p>برای نمایش نتایج در ترمینال به شکلی خوانا و جذاب، از کتابخانه <code>rich</code> استفاده شده است. این کتابخانه امکان ایجاد جداول رنگی، پنل‌ها و قالب‌بندی‌های متنی زیبا را فراهم می‌کند که مقایسه نتایج را بسیار ساده‌تر می‌سازد.</p>
-
-    <div class="note">
-        <strong>توجه:</strong> تصاویر زیر نتایج اجرای برنامه را نشان می‌دهند. برای مشاهده صحیح، اطمینان حاصل کنید که فایل‌های تصویری در مسیر صحیح (<code>img/...</code>) قرار دارند.
-    </div>
+    <p>برای نمایش نتایج در ترمینال به شکلی خوانا و جذاب، از کتابخانه <code>rich</code> استفاده شده است. این کتابخانه
+        امکان ایجاد جداول رنگی، پنل‌ها و قالب‌بندی‌های متنی زیبا را فراهم می‌کند که مقایسه نتایج را بسیار ساده‌تر
+        می‌سازد.</p>
 
     <div class="results-grid">
-        <div class="result-item"><h3>پازل 2x2</h3><img src="img/2*2-8.png" alt="نتیجه اجرای پازل 2x2 با الگوریتم‌های A* و RBFS"></div>
-        <div class="result-item"><h3>پازل 3x3</h3><img src="img/3*3-27.png" alt="نتیجه اجرای پازل 3x3 با الگوریتم‌های A* و RBFS"></div>
-        <div class="result-item"><h3>پازل 3x3 (200 حرکت)</h3><img src="img/3*3-200.png" alt="نتیجه اجرای پازل 3x3 با 200 حرکت تصادفی"></div>
-        <div class="result-item"><h3>پازل 5x5 (80 حرکت)</h3><img src="img/5*5-80.png" alt="نتیجه اجرای پازل 5x5 با 80 حرکت تصادفی"></div>
-        <div class="result-item"><h3>پازل 5x5 (120 حرکت)</h3><img src="img/5*5-120.png" alt="نتیجه اجرای پازل 5x5 با 120 حرکت تصادفی"></div>
-        <div class="result-item"><h3>پازل 6x6</h3><img src="img/6*6-120.png" alt="نتیجه اجرای پازل 6x6 با الگوریتم‌های A* و RBFS"></div>
+        <div class="result-item"><h3>پازل 2x2</h3><img alt="نتیجه اجرای پازل 2x2 با الگوریتم‌های A* و RBFS"
+                                                       src="img/2*2-8.png"></div>
+        <div class="result-item"><h3>پازل 3x3</h3><img alt="نتیجه اجرای پازل 3x3 با الگوریتم‌های A* و RBFS"
+                                                       src="img/3*3-27.png"></div>
+        <div class="result-item"><h3>پازل 3x3 (200 حرکت)</h3><img alt="نتیجه اجرای پازل 3x3 با 200 حرکت تصادفی"
+                                                                  src="img/3*3-200.png"></div>
+        <div class="result-item"><h3>پازل 5x5 (80 حرکت)</h3><img alt="نتیجه اجرای پازل 5x5 با 80 حرکت تصادفی"
+                                                                 src="img/5*5-80.png"></div>
+        <div class="result-item"><h3>پازل 5x5 (120 حرکت)</h3><img alt="نتیجه اجرای پازل 5x5 با 120 حرکت تصادفی"
+                                                                  src="img/5*5-120.png"></div>
+        <div class="result-item"><h3>پازل 6x6</h3><img alt="نتیجه اجرای پازل 6x6 با الگوریتم‌های A* و RBFS"
+                                                       src="img/6*6-120.png"></div>
     </div>
 
     <h3>تحلیل نتایج</h3>
@@ -273,217 +436,259 @@
         </tr>
         </tbody>
     </table>
-    <p>با توجه به نتایج مشاهده‌شده در تصاویر، A* به طور مداوم گره‌های کمتری را نسبت به RBFS گسترش می‌دهد، که نشان‌دهنده کارایی بالاتر آن در کاوش فضای جستجو است. در مقابل، RBFS به دلیل بازگسترش مکرر گره‌ها، تعداد گره‌های بسیار بیشتری را بررسی می‌کند. تفاوت حافظه در این نمونه‌ها محسوس نیست، اما این محدودیت ابزار اندازه‌گیری است و در تئوری A* حافظه بسیار بیشتری مصرف می‌کند.</p>
+    <p>با توجه به نتایج مشاهده‌شده در تصاویر، A* به طور مداوم گره‌های کمتری را نسبت به RBFS گسترش می‌دهد، که نشان‌دهنده
+        کارایی بالاتر آن در کاوش فضای جستجو است. در مقابل، RBFS به دلیل بازگسترش مکرر گره‌ها، تعداد گره‌های بسیار بیشتری
+        را بررسی می‌کند. تفاوت حافظه در این نمونه‌ها محسوس نیست، اما این محدودیت ابزار اندازه‌گیری است و در تئوری A*
+        حافظه بسیار بیشتری مصرف می‌کند.</p>
 
     <h3>مقایسه مقیاس‌پذیری</h3>
-    <p>برای بررسی مقیاس‌پذیری الگوریتم‌های A* و RBFS، نمودارهای زیر عملکرد آن‌ها را بر اساس اندازه پازل (\(N\)) و تعداد حرکات تصادفی (scramble amount) نشان می‌دهند. این نمودارها زمان اجرا، حافظه مصرفی، تعداد گره‌های گسترش‌یافته و طول مسیر جواب را برای پازل‌های مختلف مقایسه می‌کنند.</p>
+    <p>برای بررسی مقیاس‌پذیری الگوریتم‌های A* و RBFS، نمودارهای زیر عملکرد آن‌ها را بر اساس اندازه پازل (\(N\)) و تعداد
+        حرکات تصادفی (scramble amount) نشان می‌دهند. این نمودارها زمان اجرا، حافظه مصرفی، تعداد گره‌های گسترش‌یافته و
+        طول مسیر جواب را برای پازل‌های مختلف مقایسه می‌کنند.</p>
     <canvas id="executionTimeChart"></canvas>
     <canvas id="memoryUsageChart"></canvas>
     <canvas id="nodesExpandedChart"></canvas>
     <canvas id="pathLengthChart"></canvas>
     <script>
-        const labels = ['2x2, 10 moves', '2x2, 50 moves', '2x2, 100 moves', '2x2, 150 moves', '2x2, 200 moves',
-            '3x3, 10 moves', '3x3, 50 moves', '3x3, 100 moves', '3x3, 150 moves', '3x3, 200 moves',
-            '4x4, 10 moves', '4x4, 50 moves', '4x4, 100 moves', '4x4, 150 moves', '4x4, 200 moves',
-            '5x5, 10 moves', '5x5, 50 moves', '5x5, 100 moves', '5x5, 150 moves', '5x5, 200 moves'];
-
-        const data = {
-            metrics: {
-                a_star: {
-                    execution_time: [0.05, 0.1, 0.15, 0.2, 0.25, 0.1, 0.2617, 0.5, 0.8, 1.0, 0.5, 1.2, 2.0, 3.0, 4.0, 2.0, 3.5, 5.0, 7.0, 10.0],
-                    memory_usage: [50.0, 75.0, 100.0, 120.0, 150.0, 80.0, 106.38, 150.0, 200.0, 250.0, 200.0, 300.0, 400.0, 500.0, 600.0, 500.0, 700.0, 900.0, 1100.0, 1300.0],
-                    nodes_expanded: [1000, 5000, 10000, 15000, 20000, 5000, 49999, 100000, 150000, 200000, 50000, 200000, 400000, 600000, 800000, 200000, 500000, 1000000, 1500000, 2000000],
-                    path_length: [8, 10, 12, 14, 16, 10, 38, 40, 45, 50, 20, 50, 60, 70, 80, 50, 80, 100, 120, 150]
-                },
-                rbfs: {
-                    execution_time: [0.5, 1.2, 2.0, 3.0, 4.0, 1.0, 59.3477, 100.0, 150.0, 200.0, 5.0, 20.0, 50.0, 80.0, 120.0, 50.0, 100.0, 200.0, 300.0, 400.0],
-                    memory_usage: [1.0, 1.05, 1.1, 1.15, 1.2, 1.05, 1.11, 1.2, 1.3, 1.4, 1.2, 1.3, 1.4, 1.5, 1.6, 1.5, 1.7, 1.9, 2.0, 2.2],
-                    nodes_expanded: [5000, 20000, 50000, 100000, 150000, 10000, 11675490, 20000000, 30000000, 40000000, 500000, 2000000, 5000000, 8000000, 10000000, 5000000, 10000000, 20000000, 30000000, 40000000],
-                    path_length: [8, 10, 12, 14, 16, 10, 38, 40, 45, 50, 20, 50, 60, 70, 80, 50, 80, 100, 120, 150]
+        function sortLabels(labels) {
+            return labels.sort((a, b) => {
+                const [sizeA, movesA] = a.split('x').map(Number);
+                const [sizeB, movesB] = b.split('x').map(Number);
+                if (sizeA !== sizeB) {
+                    return sizeA - sizeB;
                 }
-            }
-        };
+                return movesA - movesB;
+            });
+        }
 
-        // Execution Time Chart
-        new Chart(document.getElementById('executionTimeChart'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'A*',
-                        data: data.metrics.a_star.execution_time,
-                        borderColor: '#007bff',
-                        backgroundColor: '#007bff',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+        fetch('metrics_data.json')
+            .then(response => response.json())
+            .then(data => {
+                const labels = sortLabels(data.labels);
+
+                new Chart(document.getElementById('executionTimeChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'A*',
+                                data: data.metrics.a_star.execution_time,
+                                borderColor: '#007bff',
+                                backgroundColor: '#007bff',
+                                pointRadius: 5,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'RBFS',
+                                data: data.metrics.rbfs.execution_time,
+                                borderColor: '#dc3545',
+                                backgroundColor: '#dc3545',
+                                pointRadius: 4,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                fill: false
+                            }
+                        ]
                     },
-                    {
-                        label: 'RBFS',
-                        data: data.metrics.rbfs.execution_time,
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc3545',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true, title: {display: true, text: 'زمان اجرا (ثانیه)'},
+                                min: 0.00001,
+                                max: 100,
+                                type: 'logarithmic'
+                            },
+                            x: {title: {display: true, text: 'اندازه پازل و تعداد حرکات'}}
+                        },
+                        plugins: {
+                            legend: {position: 'top'},
+                            title: {display: true, text: 'مقایسه زمان اجرا'},
+                            tooltip: {enabled: true}
+                        }
                     }
-                ]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'زمان اجرا (ثانیه)' } },
-                    x: { title: { display: true, text: 'اندازه پازل و تعداد حرکات' } }
-                },
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: 'مقایسه زمان اجرا' },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
+                });
 
-        // Memory Usage Chart
-        new Chart(document.getElementById('memoryUsageChart'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'A*',
-                        data: data.metrics.a_star.memory_usage,
-                        borderColor: '#007bff',
-                        backgroundColor: '#007bff',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+                // Memory Usage Chart
+                new Chart(document.getElementById('memoryUsageChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'A*',
+                                data: data.metrics.a_star.memory_usage,
+                                borderColor: '#007bff',
+                                backgroundColor: '#007bff',
+                                pointRadius: 5,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'RBFS',
+                                data: data.metrics.rbfs.memory_usage,
+                                borderColor: '#dc3545',
+                                backgroundColor: '#dc3545',
+                                pointRadius: 4,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                fill: false
+                            }
+                        ]
                     },
-                    {
-                        label: 'RBFS',
-                        data: data.metrics.rbfs.memory_usage,
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc3545',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'حافظه مصرفی (MB)' } },
-                    x: { title: { display: true, text: 'اندازه پازل و تعداد حرکات' } }
-                },
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: 'مقایسه حافظه مصرفی' },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
+                    options: {
+                        scales: {
 
-        // Nodes Expanded Chart
-        new Chart(document.getElementById('nodesExpandedChart'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'A*',
-                        data: data.metrics.a_star.nodes_expanded,
-                        borderColor: '#007bff',
-                        backgroundColor: '#007bff',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
-                    },
-                    {
-                        label: 'RBFS',
-                        data: data.metrics.rbfs.nodes_expanded,
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc3545',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+                            y: {
+                                beginAtZero: true,
+                                title: {display: true, text: 'حافظه مصرفی (MB)'},
+                                type: 'logarithmic',
+                                min: 0.1,
+                                max: 100
+                            },
+                            x: {title: {display: true, text: 'اندازه پازل و تعداد حرکات'}}
+                        },
+                        plugins: {
+                            legend: {position: 'top'},
+                            title: {display: true, text: 'مقایسه حافظه مصرفی'},
+                            tooltip: {enabled: true}
+                        }
                     }
-                ]
-            },
-            options: {
-                scales: {
-                    y: {
-                        type: 'logarithmic',
-                        title: { display: true, text: 'تعداد گره‌های گسترش‌یافته' }
-                    },
-                    x: { title: { display: true, text: 'اندازه پازل و تعداد حرکات' } }
-                },
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: 'مقایسه تعداد گره‌های گسترش‌یافته' },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
+                });
 
-        // Path Length Chart
-        new Chart(document.getElementById('pathLengthChart'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: 'A*',
-                        data: data.metrics.a_star.path_length,
-                        borderColor: '#007bff',
-                        backgroundColor: '#007bff',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+                // Nodes Expanded Chart
+                new Chart(document.getElementById('nodesExpandedChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'A*',
+                                data: data.metrics.a_star.nodes_expanded,
+                                borderColor: '#007bff',
+                                backgroundColor: '#007bff',
+                                pointRadius: 5,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'RBFS',
+                                data: data.metrics.rbfs.nodes_expanded,
+                                borderColor: '#dc3545',
+                                backgroundColor: '#dc3545',
+                                pointRadius: 4,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                fill: false
+                            }
+                        ]
                     },
-                    {
-                        label: 'RBFS',
-                        data: data.metrics.rbfs.path_length,
-                        borderColor: '#dc3545',
-                        backgroundColor: '#dc3545',
-                        pointRadius: 5,
-                        tension: 0.4,
-                        fill: false
+                    options: {
+                        scales: {
+                            y: {
+                                type: 'logarithmic',
+                                min: 1,
+                                max: 10000000,
+                                title: {display: true, text: 'تعداد گره‌های گسترش‌یافته'}
+                            },
+                            x: {title: {display: true, text: 'اندازه پازل و تعداد حرکات'}}
+                        },
+                        plugins: {
+                            legend: {position: 'top'},
+                            title: {display: true, text: 'مقایسه تعداد گره‌های گسترش‌یافته'},
+                            tooltip: {enabled: true}
+                        }
                     }
-                ]
-            },
-            options: {
-                scales: {
-                    y: { beginAtZero: true, title: { display: true, text: 'طول مسیر جواب' } },
-                    x: { title: { display: true, text: 'اندازه پازل و تعداد حرکات' } }
-                },
-                plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: 'مقایسه طول مسیر جواب' },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
+                });
+
+                // Path Length Chart
+                new Chart(document.getElementById('pathLengthChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'A*',
+                                data: data.metrics.a_star.path_length,
+                                borderColor: '#007bff',
+                                backgroundColor: '#007bff',
+                                pointRadius: 5,
+                                tension: 0.4,
+                                fill: false
+                            },
+                            {
+                                label: 'RBFS',
+                                data: data.metrics.rbfs.path_length,
+                                borderColor: '#dc3545',
+                                backgroundColor: '#dc3545',
+                                pointRadius: 4,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                tension: 0.3,
+                                fill: false
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {beginAtZero: true, title: {display: true, text: 'طول مسیر جواب'}},
+                            x: {title: {display: true, text: 'اندازه پازل و تعداد حرکات'}}
+                        },
+                        plugins: {
+                            legend: {position: 'top'},
+                            title: {display: true, text: 'مقایسه طول مسیر جواب'},
+                            tooltip: {enabled: true}
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error loading JSON:', error));
     </script>
-
     <h2>بهینه‌سازی برای پازل‌های بزرگ: پیاده‌سازی موازی با Go</h2>
-    <p>با افزایش اندازه پازل \(N > 4\)، محدودیت‌های پایتون از نظر سرعت اجرا آشکارتر می‌شود. برای حل پازل‌های پیچیده‌تر، یک پیاده‌سازی چندنخی در زبان Go به دلیل کارایی بالا، همزمانی داخلی و مدیریت حافظه دقیق، راهکار بسیار بهتری است. این رویکرد امکان توزیع بار کاری بین چندین هسته پردازنده را فراهم کرده و سرعت حل مسائل بزرگ را به شدت افزایش می‌دهد.</p>
+    <p>با افزایش اندازه پازل \(N > 4\)، محدودیت‌های پایتون از نظر سرعت اجرا آشکارتر می‌شود. برای حل پازل‌های پیچیده‌تر،
+        یک پیاده‌سازی چندنخی در زبان Go به دلیل کارایی بالا، همزمانی داخلی و مدیریت حافظه دقیق، راهکار بسیار بهتری است.
+        این رویکرد امکان توزیع بار کاری بین چندین هسته پردازنده را فراهم کرده و سرعت حل مسائل بزرگ را به شدت افزایش
+        می‌دهد.</p>
 
     <h2>نتیجه‌گیری</h2>
-    <p>انتخاب بین الگوریتم‌های A* و RBFS یک مصالحه (trade-off) کلاسیک بین <strong>فضا</strong> و <strong>زمان</strong> را به نمایش می‌گذارد. هر دو الگوریتم بهینه هستند و کوتاه‌ترین مسیر را پیدا می‌کنند، اما روش رسیدن آن‌ها به جواب و منابعی که مصرف می‌کنند متفاوت است.</p>
+    <p>انتخاب بین الگوریتم‌های A* و RBFS یک مصالحه (trade-off) کلاسیک بین <strong>فضا</strong> و <strong>زمان</strong>
+        را به نمایش می‌گذارد. هر دو الگوریتم بهینه هستند و کوتاه‌ترین مسیر را پیدا می‌کنند، اما روش رسیدن آن‌ها به جواب
+        و منابعی که مصرف می‌کنند متفاوت است.</p>
     <ul>
         <li>
-            <strong>A*، انتخاب مطمئن با حافظه کافی:</strong> الگوریتم A* به دلیل استفاده از لیست بسته، هر گره را تنها یک بار گسترش می‌دهد. این ویژگی آن را به کارآمدترین الگوریتم از نظر تعداد گره‌های بررسی‌شده تبدیل می‌کند. اگر حافظه سیستم محدودیتی ایجاد نکند، A* تقریباً همیشه انتخاب بهتری است، زیرا هم سریع‌تر (از نظر محاسباتی) و هم قابل پیش‌بینی‌تر عمل می‌کند. با این حال، مشکل اصلی آن <strong>رشد نمایی حافظه</strong> است. برای پازل‌های بزرگ یا پیچیده، لیست باز و بسته می‌توانند به سرعت تمام حافظه RAM را اشغال کرده و برنامه را متوقف کنند.
+            <strong>A*، انتخاب مطمئن با حافظه کافی:</strong> الگوریتم A* به دلیل استفاده از لیست بسته، هر گره را تنها یک
+            بار گسترش می‌دهد. این ویژگی آن را به کارآمدترین الگوریتم از نظر تعداد گره‌های بررسی‌شده تبدیل می‌کند. اگر
+            حافظه سیستم محدودیتی ایجاد نکند، A* تقریباً همیشه انتخاب بهتری است، زیرا هم سریع‌تر (از نظر محاسباتی) و هم
+            قابل پیش‌بینی‌تر عمل می‌کند. با این حال، مشکل اصلی آن <strong>رشد نمایی حافظه</strong> است. برای پازل‌های
+            بزرگ یا پیچیده، لیست باز و بسته می‌توانند به سرعت تمام حافظه RAM را اشغال کرده و برنامه را متوقف کنند.
         </li>
         <li>
-            <strong>RBFS، راهکار حافظه-محدود:</strong> الگوریتم RBFS با هوشمندی مشکل حافظه A* را حل می‌کند. با داشتن حافظه مصرفی خطی متناسب با عمق جواب، این الگوریتم می‌تواند فضاهای جستجوی بسیار بزرگی را که برای A* غیرممکن است، کاوش کند. اما این مزیت به قیمت <strong>بازگشت و بازگسترش مکرر گره‌ها</strong> تمام می‌شود. RBFS ممکن است مجبور شود بارها و بارها یک زیردرخت را از نو بسازد و کاوش کند، که منجر به افزایش شدید تعداد کل گره‌های گسترش‌یافته و در نتیجه، زمان اجرای طولانی‌تر می‌شود. این "فراموشی" مسیرهای کاوش‌شده، پاشنه آشیل آن است.
+            <strong>RBFS، راهکار حافظه-محدود:</strong> الگوریتم RBFS با هوشمندی مشکل حافظه A* را حل می‌کند. با داشتن
+            حافظه مصرفی خطی متناسب با عمق جواب، این الگوریتم می‌تواند فضاهای جستجوی بسیار بزرگی را که برای A* غیرممکن
+            است، کاوش کند. اما این مزیت به قیمت <strong>بازگشت و بازگسترش مکرر گره‌ها</strong> تمام می‌شود. RBFS ممکن
+            است مجبور شود بارها و بارها یک زیردرخت را از نو بسازد و کاوش کند، که منجر به افزایش شدید تعداد کل گره‌های
+            گسترش‌یافته و در نتیجه، زمان اجرای طولانی‌تر می‌شود. این "فراموشی" مسیرهای کاوش‌شده، پاشنه آشیل آن است.
         </li>
         <li>
-            <strong>نقش حیاتی هیوریستیک:</strong> عملکرد هر دو الگوریتم به شدت به کیفیت تابع هیوریستیک بستگی دارد. یک هیوریستیک دقیق‌تر (که به هزینه واقعی نزدیک‌تر باشد) فضای جستجو را بهتر هدایت کرده و باعث کاهش چشمگیر گره‌های گسترش‌یافته و زمان اجرا برای هر دو الگوریتم می‌شود.
+            <strong>نقش حیاتی هیوریستیک:</strong> عملکرد هر دو الگوریتم به شدت به کیفیت تابع هیوریستیک بستگی دارد. یک
+            هیوریستیک دقیق‌تر (که به هزینه واقعی نزدیک‌تر باشد) فضای جستجو را بهتر هدایت کرده و باعث کاهش چشمگیر گره‌های
+            گسترش‌یافته و زمان اجرا برای هر دو الگوریتم می‌شود.
         </li>
         <li>
-            <strong>فراتر از پایتون:</strong> همانطور که اشاره شد، برای مسائل واقعاً بزرگ، محدودیت‌های ذاتی پایتون ما را به سمت راه‌حل‌های قوی‌تر سوق می‌دهد. پیاده‌سازی موازی در زبانی مانند Go نه تنها سرعت را افزایش می‌دهد، بلکه امکان استفاده از معماری‌های چند هسته‌ای مدرن را برای حل مسائلی فراهم می‌کند که پیش از این غیرقابل حل به نظر می‌رسیدند.
+            <strong>فراتر از پایتون:</strong> همانطور که اشاره شد، برای مسائل واقعاً بزرگ، محدودیت‌های ذاتی پایتون ما را
+            به سمت راه‌حل‌های قوی‌تر سوق می‌دهد. پیاده‌سازی موازی در زبانی مانند Go نه تنها سرعت را افزایش می‌دهد، بلکه
+            امکان استفاده از معماری‌های چند هسته‌ای مدرن را برای حل مسائلی فراهم می‌کند که پیش از این غیرقابل حل به نظر
+            می‌رسیدند.
         </li>
     </ul>
-    <p>در نهایت، A* برای مسائل با اندازه متوسط که در حافظه جای می‌گیرند، ایده‌آل است. RBFS زمانی وارد میدان می‌شود که با محدودیت شدید حافظه روبرو هستیم. برای کاربردهای عملی در مقیاس بزرگ، ترکیبی از الگوریتم‌های بهتر مانند <strong>IDA*</strong> (که مزایای حافظه کم جستجوی عمقی را با هدایت هیوریستیک A* ترکیب می‌کند) و پیاده‌سازی‌های بهینه در زبان‌های سطح پایین، رویکرد استاندارد محسوب می‌شود.</p>
+    <p>در نهایت، A* برای مسائل با اندازه متوسط که در حافظه جای می‌گیرند، ایده‌آل است. RBFS زمانی وارد میدان می‌شود که با
+        محدودیت شدید حافظه روبرو هستیم. برای کاربردهای عملی در مقیاس بزرگ، ترکیبی از الگوریتم‌های بهتر مانند <strong>IDA*</strong>
+        (که مزایای حافظه کم جستجوی عمقی را با هدایت هیوریستیک A* ترکیب می‌کند) و پیاده‌سازی‌های بهینه در زبان‌های سطح
+        پایین، رویکرد استاندارد محسوب می‌شود.</p>
 </div>
 </body>
 </html>

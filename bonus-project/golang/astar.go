@@ -26,7 +26,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 	old := *pq
 	n := len(old)
 	item := old[n-1]
-	old[n-1] = nil 
+	old[n-1] = nil
 	*pq = old[0 : n-1]
 	return item
 }
@@ -37,7 +37,7 @@ func AStarSearch(initialBoard [][]int, size int) (solution *PuzzleState, duratio
 
 	initialState := NewPuzzleState(initialBoard, size, 0, nil)
 	goalBoard := GetGoalBoard(size)
-	goalStateForComparison := NewPuzzleState(goalBoard, size, 0, nil) 
+	goalStateForComparison := NewPuzzleState(goalBoard, size, 0, nil)
 	goalKey := goalStateForComparison.Key()
 
 	openList := &PriorityQueue{}

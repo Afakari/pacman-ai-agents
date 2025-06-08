@@ -10,13 +10,12 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-
 type appState int
 
 const (
 	stateInitializing appState = iota
 	stateGeneratingPuzzle
-	statePuzzleGenerated 
+	statePuzzleGenerated
 	stateRunningAStar
 	stateAStarDone
 	stateRunningRBFS
@@ -26,58 +25,58 @@ const (
 	stateQuitting
 )
 
-// Messages
 type puzzleGeneratedMsg struct {
 	board [][]int
 	err   error
 }
 type aStarResultMsg struct {
-	result    *PuzzleState
-	path      [][][]int
-	duration  time.Duration
-	memory    float64
-	nodes     int
-	err       error
+	result   *PuzzleState
+	path     [][][]int
+	duration time.Duration
+	memory   float64
+	nodes    int
+	err      error
 }
 type rbfsResultMsg struct {
-	result    *PuzzleState
-	path      [][][]int
-	duration  time.Duration
-	memory    float64
-	nodes     int
-	err       error
+	result   *PuzzleState
+	path     [][][]int
+	duration time.Duration
+	memory   float64
+	nodes    int
+	err      error
 }
 
 type model struct {
 	puzzleSize    int
 	scrambleMoves int
-	showSteps     bool 
+	showSteps     bool
 	forceGC       bool
+	rbfsNodeLimit int
 
 	state          appState
 	spinner        spinner.Model
 	loadingMessage string
 	errorMessage   string
-	width, height  int 
+	width, height  int
 
 	initialBoard [][]int
-	goalBoardKey string 
+	goalBoardKey string
 
-	aStarResult    *PuzzleState
-	aStarPath      [][][]int
-	aStarDuration  time.Duration
-	aStarMemory    float64
-	aStarNodes     int
-	aStarSolved    bool
-	aStarError     error
+	aStarResult   *PuzzleState
+	aStarPath     [][][]int
+	aStarDuration time.Duration
+	aStarMemory   float64
+	aStarNodes    int
+	aStarSolved   bool
+	aStarError    error
 
-	rbfsResult    *PuzzleState
-	rbfsPath      [][][]int
-	rbfsDuration  time.Duration
-	rbfsMemory    float64
-	rbfsNodes     int
-	rbfsSolved    bool
-	rbfsError     error
+	rbfsResult   *PuzzleState
+	rbfsPath     [][][]int
+	rbfsDuration time.Duration
+	rbfsMemory   float64
+	rbfsNodes    int
+	rbfsSolved   bool
+	rbfsError    error
 
 	styleHelp      lipgloss.Style
 	styleError     lipgloss.Style
@@ -87,30 +86,30 @@ type model struct {
 	styleBorderBox lipgloss.Style
 }
 
-func initialModel(pSize, sMoves int, sSteps, fGC bool) model {
+func initialModel(pSize, sMoves int, sSteps, fGC bool, rbfsLimit int) model {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205")) 
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
 	gb := GetGoalBoard(pSize)
 	gKey := NewPuzzleState(gb, pSize, 0, nil).Key()
 
-
 	return model{
 		puzzleSize:    pSize,
 		scrambleMoves: sMoves,
-		showSteps:     sSteps, 
+		showSteps:     sSteps,
 		forceGC:       fGC,
+		rbfsNodeLimit: rbfsLimit,
 		state:         stateInitializing,
 		spinner:       s,
 		goalBoardKey:  gKey,
 
 		styleHelp:      lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Margin(1, 0),
 		styleError:     lipgloss.NewStyle().Foreground(lipgloss.Color("196")).Bold(true),
-		styleHeader:    lipgloss.NewStyle().Bold(true).Padding(0,1).Background(lipgloss.Color("62")).Foreground(lipgloss.Color("230")),
+		styleHeader:    lipgloss.NewStyle().Bold(true).Padding(0, 1).Background(lipgloss.Color("62")).Foreground(lipgloss.Color("230")),
 		styleMuted:     lipgloss.NewStyle().Foreground(lipgloss.Color("244")),
 		styleStrong:    lipgloss.NewStyle().Bold(true),
-		styleBorderBox: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(0,1),
+		styleBorderBox: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).Padding(0, 1),
 	}
 }
 
@@ -131,7 +130,7 @@ func (m model) generatePuzzleCmd() tea.Cmd {
 
 func (m model) runAStarCmd() tea.Cmd {
 	return func() tea.Msg {
-		res, dur, mem, nodes := AStarSearch(deepCopyBoard(m.initialBoard), m.puzzleSize) 
+		res, dur, mem, nodes := AStarSearch(deepCopyBoard(m.initialBoard), m.puzzleSize)
 		var path [][][]int
 		if res != nil {
 			path = ReconstructPath(res)
@@ -142,7 +141,7 @@ func (m model) runAStarCmd() tea.Cmd {
 
 func (m model) runRBFSCmd() tea.Cmd {
 	return func() tea.Msg {
-		res, dur, mem, nodes := SolveRBFS(deepCopyBoard(m.initialBoard), m.puzzleSize) 
+		res, dur, mem, nodes := SolveRBFS(deepCopyBoard(m.initialBoard), m.puzzleSize, m.rbfsNodeLimit)
 		var path [][][]int
 		if res != nil {
 			path = ReconstructPath(res)
@@ -178,7 +177,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case stateRBFSDone:
 				m.state = stateComparingResults
 			case stateComparingResults:
-				m.state = stateQuitting 
+				m.state = stateQuitting
 				return m, tea.Quit
 			}
 		}
@@ -222,7 +221,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.loadingMessage = ""
 	}
 
-	if m.state == stateInitializing { 
+	if m.state == stateInitializing {
 		m.state = stateGeneratingPuzzle
 		m.loadingMessage = "Initializing N-Puzzle Solver..."
 	}
@@ -234,7 +233,7 @@ func (m model) View() string {
 	if m.state == stateQuitting {
 		return "Quitting N-Puzzle Solver.\n"
 	}
-	if m.width == 0 { 
+	if m.width == 0 {
 		return "Initializing..."
 	}
 
@@ -244,7 +243,7 @@ func (m model) View() string {
 	switch m.state {
 	case stateInitializing, stateGeneratingPuzzle, stateRunningAStar, stateRunningRBFS:
 		s.WriteString(fmt.Sprintf("%s %s\n\n", m.spinner.View(), m.loadingMessage))
-		if m.state == stateGeneratingPuzzle && m.initialBoard != nil { 
+		if m.state == stateGeneratingPuzzle && m.initialBoard != nil {
 			s.WriteString(formatPuzzleBoard(m.initialBoard, m.puzzleSize, "Generating..."))
 		}
 	case statePuzzleGenerated:
@@ -279,9 +278,8 @@ func (m model) View() string {
 		s.WriteString(m.styleError.Render(m.errorMessage) + "\n")
 		s.WriteString(m.styleHelp.Render("Press [q] to quit."))
 	}
-	return m.styleBorderBox.Width(m.width -2).Render(s.String())
+	return m.styleBorderBox.Width(m.width - 2).Render(s.String())
 }
-
 
 func formatPuzzleBoard(board [][]int, size int, title string) string {
 	if board == nil {
@@ -317,7 +315,6 @@ func formatSolutionPath(path [][][]int, size int, maxSteps int) string {
 	return sb.String()
 }
 
-
 func formatAlgorithmResult(name string, solved bool, path [][][]int, dur time.Duration, mem float64, nodes int, err error) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Algorithm: %s\n", name))
@@ -329,7 +326,7 @@ func formatAlgorithmResult(name string, solved bool, path [][][]int, dur time.Du
 		sb.WriteString("  Solution Found: Yes\n")
 		sb.WriteString(fmt.Sprintf("  Path Length: %d moves\n", len(path)-1))
 	} else {
-		sb.WriteString("  Solution Found: No\n")
+		sb.WriteString("  Solution Found: No (or limit reached)\n")
 	}
 	sb.WriteString(fmt.Sprintf("  Time Taken: %.4f s\n", dur.Seconds()))
 	sb.WriteString(fmt.Sprintf("  Memory Used (approx Go heap): %.2f MB\n", mem))
@@ -361,7 +358,7 @@ func formatComparisonTable(m *model) string {
 	}
 
 	for i, h := range header {
-		sb.WriteString(fmt.Sprintf("%-*s", colWidths[i]+2, h)) 
+		sb.WriteString(fmt.Sprintf("%-*s", colWidths[i]+2, h))
 	}
 	sb.WriteString("\n")
 	sb.WriteString(strings.Repeat("-", sumInts(colWidths)+len(colWidths)*2) + "\n")
@@ -382,11 +379,15 @@ func boolToString(b bool) string {
 	return "No"
 }
 func pathLenToString(path [][][]int) string {
-	if path == nil { return "N/A" }
+	if path == nil {
+		return "N/A"
+	}
 	return fmt.Sprintf("%d", len(path)-1)
 }
 func sumInts(arr []int) int {
 	sum := 0
-	for _, v := range arr { sum += v}
+	for _, v := range arr {
+		sum += v
+	}
 	return sum
 }

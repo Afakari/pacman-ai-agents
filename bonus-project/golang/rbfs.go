@@ -10,7 +10,7 @@ type rbfsNodeCounter struct {
 	count int
 }
 
-func SolveRBFS(initialBoard [][]int, size int) (solution *PuzzleState, duration time.Duration, memUsageMB float64, nodesExpanded int) {
+func SolveRBFS(initialBoard [][]int, size int, nodeLimit int) (solution *PuzzleState, duration time.Duration, memUsageMB float64, nodesExpanded int) {
 	startTime := time.Now()
 	counter := &rbfsNodeCounter{count: 0}
 
@@ -21,14 +21,13 @@ func SolveRBFS(initialBoard [][]int, size int) (solution *PuzzleState, duration 
 	}
 
 	initialState := NewPuzzleState(initialBoard, size, 0, nil)
-	initialState.FCostValue = float64(initialState.FCostAStar()) 
+	initialState.FCostValue = float64(initialState.FCostAStar())
 
 	goalBoard := GetGoalBoard(size)
 	goalStateForComparison := NewPuzzleState(goalBoard, size, 0, nil)
 	goalKey := goalStateForComparison.Key()
 
-
-	resultState, _ := rbfsRecursive(initialState, goalKey, math.Inf(1), counter)
+	resultState, _ := rbfsRecursive(initialState, goalKey, math.Inf(1), counter, nodeLimit)
 
 	duration = time.Since(startTime)
 	memUsageMB = getMemUsageMB()
@@ -36,9 +35,13 @@ func SolveRBFS(initialBoard [][]int, size int) (solution *PuzzleState, duration 
 	return resultState, duration, memUsageMB, nodesExpanded
 }
 
-func rbfsRecursive(state *PuzzleState, goalKey string, fLimit float64, counter *rbfsNodeCounter) (*PuzzleState, float64) {
+func rbfsRecursive(state *PuzzleState, goalKey string, fLimit float64, counter *rbfsNodeCounter, nodeLimit int) (*PuzzleState, float64) {
+	if nodeLimit > 0 && counter.count >= nodeLimit {
+		return nil, math.Inf(1)
+	}
+
 	if state.Key() == goalKey {
-		return state, state.FCostValue 
+		return state, state.FCostValue
 	}
 
 	counter.count++
@@ -69,12 +72,12 @@ func rbfsRecursive(state *PuzzleState, goalKey string, fLimit float64, counter *
 		}
 
 		newFLimit := math.Min(fLimit, alternativeFValue)
-		resultState, bestFUpdated := rbfsRecursive(bestSuccessor, goalKey, newFLimit, counter)
-		
-		bestSuccessor.FCostValue = bestFUpdated 
+		resultState, bestFUpdated := rbfsRecursive(bestSuccessor, goalKey, newFLimit, counter, nodeLimit)
+
+		bestSuccessor.FCostValue = bestFUpdated
 
 		if resultState != nil {
-			return resultState, bestFUpdated 
+			return resultState, bestFUpdated
 		}
 	}
 }
